@@ -1,6 +1,5 @@
 
 package projet_paa;
-
 import java.util.ArrayList;
 
 public class Colon {
@@ -10,9 +9,10 @@ public class Colon {
     */
     
     private String nomColon; //Nom du colon
-    private ArrayList<Ressource> preference;  //Modelisation de la preference d'un colon comme ArrayList car dynamique
-    
-    
+    private ArrayList<Ressource> preference; //Modelisation de la preference d'un colon comme ArrayList car dynamique
+    private Ressource ressourceAttribue; /*Ressources obtenue par le colon*/
+
+
     public Colon(String n)  //Constructeur qui initialise le nom et la liste vide
     {
         this.nomColon = n;
@@ -28,6 +28,21 @@ public class Colon {
     {
         return preference;
     }
-    
+
+    public void setPreference(Ressource r){
+        preference.add(r);
+    }
+
+    public Ressource getRessourceAttribue(){
+        return ressourceAttribue;
+    }
+
+    public void setRessourceAttribue(Ressource r){
+        ressourceAttribue = r;
+    }
+
+    public String toString(){
+        return "Nom du colon : " + nomColon + "\nRessources préférés : " + getPreference() +"\nRessource attribué : "+ ressourceAttribue;
+    }
     
 }

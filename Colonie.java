@@ -10,17 +10,31 @@ public class Colonie {
     une collection de ressources
     la gestion de relation
     */
-    
-    
+    private int nbColon; /*Nombre de colon dans la colonie*/
     private ArrayList<Ressource> listeRessource;
     
     //La clé est un colon, la valeur est un ensemble de colons avec lesquels ce colon a une relation "ne s'aiment pas".
     //Systeme de dictionnaire avec en clé un colon et en valeur un ensemble de colons avec qui la clé a une relation
     private HashMap<Colon, Set<Colon>> relations; 
 
+    /* <constructeur qui crée la colonie en définissant leur nom en fonction des lettre de l'alphabets selon le nombre
+    donner par l'utilisateur
+     */
+    public Colonie(int nb) {
+        this.nbColon = nb;
+        this.listeRessource = new ArrayList<>();
+        this.relations = new HashMap<>();
+        for(int i = 65; i < (i+nbColon); i++) { /* Utilisation de la table ASCII pour nommer les colons*/
+            String str = Character.toString((char) i);
+            ajouterColon(new Colon(str));
+            listeRessource.add(new Ressource((listeRessource.size()+1))); /* Création de N ressource autant qu'il y a de colon */
+        }
+    }
     public Colonie() {
         // Constructeur de la colonie en créant la hashMap (dictionnaire) associant à chaque colon ses relations
         //On ajoute à chaque ensemble "valeur" d'un colon tous les colons avec qui il ne s'entend pas.
+        this.nbColon = 0;
+        this.listeRessource = new ArrayList<>();
         this.relations = new HashMap<>();
     }
 
@@ -33,6 +47,7 @@ public class Colonie {
         if (!relations.containsKey(colon)) {
             relations.put(colon, new HashSet<>());
         }
+        nbColon++;
     }
 
     /*
@@ -63,5 +78,12 @@ public class Colonie {
     public Set<Colon> getVoisins(Colon colon) {
         return relations.get(colon);
     }
-    
+
+
+    /*permet d'échanget les ressources entre deux colons*/
+    public void echangeRessource(Colon colon1, Colon colon2) {
+        Ressource r = colon1.getRessourceAttribue();
+        colon1.setRessourceAttribue(colon2.getRessourceAttribue());
+        colon2.setRessourceAttribue(r);
+    }
 }

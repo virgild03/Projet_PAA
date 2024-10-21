@@ -6,17 +6,17 @@ public class Ressource {
     /*
     Classe permettant de representer des instances de Ressources qui devront etre partagées entre les Colons
     */
-    private String nomRessource; //Defini un nom pour la ressource instanciée
+    private int NumeroRessource; //Defini un numero pour la ressource instanciée
     
     
-    public Ressource(String n) // Constructeur de la ressource
+    public Ressource(int i) // Constructeur de la ressource
     {
-        this.nomRessource = n;
+        this.NumeroRessource = i;
     }
     
-    public String getNomRessource() //fonction pour recuperer le nom de la ressource instanciée
+    public int getNumeroRessource() //fonction pour recuperer le numero de la ressource instanciée
     {
-        return nomRessource;
+        return NumeroRessource;
     }
     
 }
