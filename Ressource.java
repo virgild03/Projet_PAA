@@ -18,5 +18,9 @@ public class Ressource {
     {
         return NumeroRessource;
     }
+
+    public void setNumeroRessource(int num){
+        this.NumeroRessource = num;
+    }
     
 }

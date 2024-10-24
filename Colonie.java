@@ -12,6 +12,7 @@ public class Colonie {
     */
     private int nbColon; /*Nombre de colon dans la colonie*/
     private ArrayList<Ressource> listeRessource;
+    private ArrayList<Colon> listeColons;
     
     //La clé est un colon, la valeur est un ensemble de colons avec lesquels ce colon a une relation "ne s'aiment pas".
     //Systeme de dictionnaire avec en clé un colon et en valeur un ensemble de colons avec qui la clé a une relation
@@ -26,7 +27,9 @@ public class Colonie {
         this.relations = new HashMap<>();
         for(int i = 65; i < (i+nbColon); i++) { /* Utilisation de la table ASCII pour nommer les colons*/
             String str = Character.toString((char) i);
-            ajouterColon(new Colon(str));
+            Colon colon = new Colon(str);
+            listeColons.add(colon);
+            ajouterColon(colon);
             listeRessource.add(new Ressource((listeRessource.size()+1))); /* Création de N ressource autant qu'il y a de colon */
         }
     }
@@ -35,6 +38,7 @@ public class Colonie {
         //On ajoute à chaque ensemble "valeur" d'un colon tous les colons avec qui il ne s'entend pas.
         this.nbColon = 0;
         this.listeRessource = new ArrayList<>();
+        this.listeColons = new ArrayList<>();
         this.relations = new HashMap<>();
     }
 
@@ -45,6 +49,7 @@ public class Colonie {
     */
     public void ajouterColon(Colon colon) {
         if (!relations.containsKey(colon)) {
+            listeColons.add(colon);
             relations.put(colon, new HashSet<>());
         }
         nbColon++;
@@ -80,7 +85,7 @@ public class Colonie {
     }
 
 
-    /*permet d'échanget les ressources entre deux colons*/
+    /*permet d'échanger les ressources entre deux colons*/
     public void echangeRessource(Colon colon1, Colon colon2) {
         Ressource r = colon1.getRessourceAttribue();
         colon1.setRessourceAttribue(colon2.getRessourceAttribue());
