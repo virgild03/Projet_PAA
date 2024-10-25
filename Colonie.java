@@ -14,9 +14,7 @@ public class Colonie {
 
     private ArrayList<Ressource> listeRessource;
     private ArrayList<Colon> listeColons;
-    private HashMap<Colon, ArrayList<Ressource>> preferences; /* Hashmap pour rentrer les preferences de chaque colon
-    besoin d'une liste pour avoir les preferences de maniere ordonée*/
-    
+
     //La clé est un colon, la valeur est un ensemble de colons avec lesquels ce colon a une relation "ne s'aiment pas".
     //Systeme de dictionnaire avec en clé un colon et en valeur un ensemble de colons avec qui la clé a une relation
     private HashMap<Colon, Set<Colon>> relations; 
@@ -27,7 +25,8 @@ public class Colonie {
     public Colonie(int nb) {
         this.nbColon = nb;
         this.listeRessource = new ArrayList<>();
-        this.preferences = new HashMap<>(); //Constructeur pour la hashmap de preference
+        this.listeColons = new ArrayList<>();
+
         this.relations = new HashMap<>();
         for(int i = 65; i < (i+nbColon); i++) { /* Utilisation de la table ASCII pour nommer les colons*/
             String str = Character.toString((char) i);
@@ -44,9 +43,14 @@ public class Colonie {
         this.listeRessource = new ArrayList<>();
         this.listeColons = new ArrayList<>();
         this.relations = new HashMap<>();
-        this.preferences = new HashMap<>(); //Constructeur pour la hashmap de preference
+    }
+    public ArrayList<Ressource> getListeRessource() {
+        return listeRessource;
     }
 
+    public int getNbColon() {
+        return nbColon;
+    }
     
     /*
     Si le colon rentré en parametre n'existe pas dans la hashmap relation alors on ajoute une clé colon
@@ -98,39 +102,40 @@ public class Colonie {
     }
 
     public void remplirPreferences(char x){
-        Scanner scan = new Scanner(System.in); //Créé un scanner
+        Scanner scan = new Scanner(System.in); //Créé un scanner.
         Colon colon = null;
 
         // Trouver le colon avec le nom correspondant au caractère x
         for (Colon c : listeColons) { //Iteration implicite avec for each
-            if (c.getNomColon().charAt(0) == x) { //Cherche le colon avec le nom (lettre entrée en parametre
+            if (c.getNomColon().charAt(0) == x) { //Cherche le colon avec le nom (lettre entrée en parametre)
                 colon = c; //colon = colon trouvé avec le nom x
                 break; //stop la boucle
             }
         }
 
-        if (colon != null) {
+        if (colon != null) { //on gère le cas où le colon n'est pas trouvé
             ArrayList<Ressource> prefs = new ArrayList<>();
-            System.out.println("Entrez les préférences de " + colon.getNomColon() + " (saisir le numéro de la ressource, 0 pour arrêter) :");
-            while (true) {
-                int choix = scan.nextInt();
-                if (choix == 0) {
-                    break;
-                }
-                Ressource ressource = null;
-                for (Ressource r : listeRessource) {
-                    if (r.getNumeroRessource() == choix) {
-                        ressource = r;
+            System.out.println("Entrez les préférences de " + colon.getNomColon() + " :"); //print d'indication
+
+
+            //for (int i = 0; i < nbColon; i++) { // Boucle qui passe nbColon fois
+
+                int choix = scan.nextInt(); // Scanner où l'utilisateur entre son choix
+
+                Ressource ressource = null; // Initialise ressource à null
+                for (Ressource r : listeRessource) { // For each r in listeRessource
+                    if (r.getNumeroRessource() == choix) { // Si r est la ressource rentrée par l'utilisateur
+                        ressource = r; // Ressource devient le choix de l'utilisateur
                         break;
                     }
                 }
-                if (ressource != null) {
-                    prefs.add(ressource);
+                if (ressource != null) { // Si cette même ressource n'est pas null
+                    prefs.add(ressource); // Ajoute la ressource à la liste prefs qui sera ajoutée en valeur pour le colon
                 } else {
-                    System.out.println("Ressource non trouvée. Veuillez entrer un numéro valide.");
+                    System.out.println("Ressource non trouvée. Veuillez entrer un numéro valide."); // Cas où la ressource n'est pas bonne
                 }
-            }
-            preferences.put(colon, prefs);
+            //}
+            colon.getPreference().addAll(prefs); //ajout de prefs à preference de colon
         } else {
             System.out.println("Colon non trouvé.");
         }
