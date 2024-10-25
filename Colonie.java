@@ -98,16 +98,41 @@ public class Colonie {
     }
 
     public void remplirPreferences(char x){
-        /*
-        A TERMINER
-         */
-        Scanner scan = new Scanner(System.in);
-        for(int i=0; i<preferences.size(); i++)
-        {
-            //if (/*nom du colon == x*/){
-                //colon.get(x) remplir ses preferences;
-            //}
+        Scanner scan = new Scanner(System.in); //Créé un scanner
+        Colon colon = null;
+
+        // Trouver le colon avec le nom correspondant au caractère x
+        for (Colon c : listeColons) { //Iteration implicite avec for each
+            if (c.getNomColon().charAt(0) == x) { //Cherche le colon avec le nom (lettre entrée en parametre
+                colon = c; //colon = colon trouvé avec le nom x
+                break; //stop la boucle
+            }
         }
 
+        if (colon != null) {
+            ArrayList<Ressource> prefs = new ArrayList<>();
+            System.out.println("Entrez les préférences de " + colon.getNomColon() + " (saisir le numéro de la ressource, 0 pour arrêter) :");
+            while (true) {
+                int choix = scan.nextInt();
+                if (choix == 0) {
+                    break;
+                }
+                Ressource ressource = null;
+                for (Ressource r : listeRessource) {
+                    if (r.getNumeroRessource() == choix) {
+                        ressource = r;
+                        break;
+                    }
+                }
+                if (ressource != null) {
+                    prefs.add(ressource);
+                } else {
+                    System.out.println("Ressource non trouvée. Veuillez entrer un numéro valide.");
+                }
+            }
+            preferences.put(colon, prefs);
+        } else {
+            System.out.println("Colon non trouvé.");
+        }
     }
 }
