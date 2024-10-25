@@ -12,5 +12,6 @@ public class Affectation {
     */
     
     HashMap<Colon, Ressource> affectation;
-    
+
+
 }

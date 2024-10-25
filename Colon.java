@@ -10,7 +10,7 @@ public class Colon {
     
     private String nomColon; //Nom du colon
     private ArrayList<Ressource> preference; //Modelisation de la preference d'un colon comme ArrayList car dynamique
-    private Ressource ressourceAttribue; /*Ressources obtenue par le colon*/
+    private Ressource ressourceAttribuee; /*Ressources obtenue par le colon*/
 
 
     public Colon(String n)  //Constructeur qui initialise le nom et la liste vide
@@ -34,15 +34,17 @@ public class Colon {
     }
 
     public Ressource getRessourceAttribue(){
-        return ressourceAttribue;
+        return ressourceAttribuee;
     }
 
     public void setRessourceAttribue(Ressource r){
-        ressourceAttribue = r;
+        ressourceAttribuee = r;
     }
 
     public String toString(){
-        return "Nom du colon : " + nomColon + "\nRessources préférés : " + getPreference() +"\nRessource attribué : "+ ressourceAttribue;
+        return "Nom du colon : " + nomColon + "\nRessources préférés : " + getPreference() +"\nRessource attribué : "+ ressourceAttribuee;
     }
+
+
     
 }

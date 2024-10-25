@@ -3,7 +3,9 @@ package projet_paa;
 import java.util.Scanner;
 
 public class Simulateur {
-
+    /*
+    Permet d'executer les instructions données dans l'énoncé de la partie 1
+     */
     public static int cout; //Permet d'initialiser un cout (jalousie) à 0 lors de la création du simulateur. 
     
     
@@ -21,7 +23,7 @@ public class Simulateur {
 
         if(sc.nextInt() == 1){
             System.out.println("Colon 1 ?");
-            Colon colon1 = new Colon(sc.next());   /*Possibilité d'améliorer sans construire de nouveau colon*/
+            Colon colon1 = new Colon(sc.next());   /*UTILISER SCANNER Possibilité d'améliorer sans construire de nouveau colon*/
             System.out.println("Colon 2 ?");
             Colon colon2 = new Colon(sc.next());
             colonie.ajouterMauvaiseRelation(colon1, colon2);

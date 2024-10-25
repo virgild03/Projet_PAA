@@ -11,8 +11,11 @@ public class Colonie {
     la gestion de relation
     */
     private int nbColon; /*Nombre de colon dans la colonie*/
+
     private ArrayList<Ressource> listeRessource;
     private ArrayList<Colon> listeColons;
+    private HashMap<Colon, ArrayList<Ressource>> preferences; /* Hashmap pour rentrer les preferences de chaque colon
+    besoin d'une liste pour avoir les preferences de maniere ordonée*/
     
     //La clé est un colon, la valeur est un ensemble de colons avec lesquels ce colon a une relation "ne s'aiment pas".
     //Systeme de dictionnaire avec en clé un colon et en valeur un ensemble de colons avec qui la clé a une relation
@@ -24,6 +27,7 @@ public class Colonie {
     public Colonie(int nb) {
         this.nbColon = nb;
         this.listeRessource = new ArrayList<>();
+        this.preferences = new HashMap<>(); //Constructeur pour la hashmap de preference
         this.relations = new HashMap<>();
         for(int i = 65; i < (i+nbColon); i++) { /* Utilisation de la table ASCII pour nommer les colons*/
             String str = Character.toString((char) i);
@@ -40,6 +44,7 @@ public class Colonie {
         this.listeRessource = new ArrayList<>();
         this.listeColons = new ArrayList<>();
         this.relations = new HashMap<>();
+        this.preferences = new HashMap<>(); //Constructeur pour la hashmap de preference
     }
 
     
@@ -90,5 +95,19 @@ public class Colonie {
         Ressource r = colon1.getRessourceAttribue();
         colon1.setRessourceAttribue(colon2.getRessourceAttribue());
         colon2.setRessourceAttribue(r);
+    }
+
+    public void remplirPreferences(char x){
+        /*
+        A TERMINER
+         */
+        Scanner scan = new Scanner(System.in);
+        for(int i=0; i<preferences.size(); i++)
+        {
+            //if (/*nom du colon == x*/){
+                //colon.get(x) remplir ses preferences;
+            //}
+        }
+
     }
 }
