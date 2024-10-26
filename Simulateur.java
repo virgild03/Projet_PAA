@@ -59,11 +59,19 @@ public class Simulateur {
             sc.nextLine();
             /*
             faire l'affectation dans l'ordre que veut l'utilisateur
+            - instancier affectation
+            - utiliser la methode affectation.affectationNaive(c) pour que le colon en parametre recoive son souhait le plus haut
 
-            Puis echange de ressource
+            Puis echange de ressource avec la methode colonie.echangerRessource
 
-            Puis le cout de jalousie
+
+
+            Puis le cout de jalousie qui est un attribut static de simulateur qu'il suffit d'incrementer quand les voeux
+            plus souhaités par un colon sont affectés  à un colon qui est dans son set associé dans relations de colonie.
+
             + ajouter attribut boolean jalousie à colon pour pouvoir afficher quel colon est jaloux
+
+            enfin si l'utilisateur appuie sur fin -> System.exit(0);
              */
 
         }
