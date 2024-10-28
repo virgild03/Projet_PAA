@@ -22,5 +22,8 @@ public class Ressource {
     public void setNumeroRessource(int num){
         this.NumeroRessource = num;
     }
-    
+
+    public String toString() {
+        return "Ressource " + NumeroRessource;
+    }
 }

@@ -10,8 +10,9 @@ public class Colon {
     
     private String nomColon; //Nom du colon
     private ArrayList<Ressource> preference; //Modelisation de la preference d'un colon comme ArrayList car dynamique
+    // Utiliser une HashMap pour les preferences ? (Pour ajouter le niveau de préférence)
     private Ressource ressourceAttribuee; /*Ressources obtenue par le colon*/
-
+    private boolean jaloux = false; // Attribut pour indiquer si le colon est jaloux ou non
 
     public Colon(String n)  //Constructeur qui initialise le nom et la liste vide
     {
@@ -41,10 +42,15 @@ public class Colon {
         ressourceAttribuee = r;
     }
 
-    public String toString(){
-        return "Nom du colon : " + nomColon + "\nRessources préférés : " + getPreference() +"\nRessource attribué : "+ ressourceAttribuee;
+    public boolean isJaloux() { //vérifie si le colon est jaloux
+        return jaloux;
     }
 
+    public void setJaloux(boolean jaloux) { //affecter le caractère jaloux au colon
+        this.jaloux = jaloux;
+    }
 
-    
+    public String toString() {
+        return "Nom du colon : " + nomColon + "\nRessources préférées : " + preference + "\nRessource attribuée : " + ressourceAttribuee + "\nEst jaloux : " + jaloux;
+    }
 }

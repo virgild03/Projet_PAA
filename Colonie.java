@@ -26,24 +26,38 @@ public class Colonie {
         this.nbColon = nb;
         this.listeRessource = new ArrayList<>();
         this.listeColons = new ArrayList<>();
-
         this.relations = new HashMap<>();
-        for(int i = 65; i < (i+nbColon); i++) { /* Utilisation de la table ASCII pour nommer les colons*/
-            String str = Character.toString((char) i);
-            Colon colon = new Colon(str);
+
+        for (int i = 0; i < nbColon; i++) {
+            String nomColon = genererNomColon(i);
+            Colon colon = new Colon(nomColon);
             listeColons.add(colon);
-            ajouterColon(colon);
-            listeRessource.add(new Ressource((listeRessource.size()+1))); /* Création de N ressource autant qu'il y a de colon */
+            relations.put(colon, new HashSet<>());
+            Ressource ressource = new Ressource(i + 1);
+            listeRessource.add(ressource);
         }
     }
-    public Colonie() {
+
+    private String genererNomColon(int index) {
+        StringBuilder nom = new StringBuilder();
+        index++;
+
+        while (index > 0) {
+            index--;
+            char lettre = (char) ('A' + (index % 26)); //code ASCII de 'A' + index < 26 (ex: 'A' + 1 = 'B')
+            nom.insert(0, lettre); //ajoute la lettre à "nom"
+            index = index / 26; //permet d'inserer une 2eme lettre si index > 26
+        }
+        return nom.toString();
+    }
+    /*public Colonie() {
         // Constructeur de la colonie en créant la hashMap (dictionnaire) associant à chaque colon ses relations
         //On ajoute à chaque ensemble "valeur" d'un colon tous les colons avec qui il ne s'entend pas.
         this.nbColon = 0;
         this.listeRessource = new ArrayList<>();
         this.listeColons = new ArrayList<>();
         this.relations = new HashMap<>();
-    }
+    }*/
     public ArrayList<Ressource> getListeRessource() {
         return listeRessource;
     }
@@ -51,26 +65,30 @@ public class Colonie {
     public int getNbColon() {
         return nbColon;
     }
-    
+
+    public ArrayList<Colon> getListeColons() {
+        return listeColons;
+    }
+
     /*
     Si le colon rentré en parametre n'existe pas dans la hashmap relation alors on ajoute une clé colon
     rentré en parametre et on lui attribue un set (ensemble vide) des colons avec qui sa relation est mauvaise
     */
-    public void ajouterColon(Colon colon) {
+    /*public void ajouterColon(Colon colon) {
         if (!relations.containsKey(colon)) {
             listeColons.add(colon);
             relations.put(colon, new HashSet<>());
         }
         nbColon++;
-    }
+    }*/
 
     /*
     permet d'ajouter une MAUVAISE relation entre deux colons entrés en parametre
     
     */
     public void ajouterMauvaiseRelation(Colon colon1, Colon colon2) {
-        ajouterColon(colon1); //Permet d'ajouter le colon1 à la colonie si ce nest pas deja fait, ne fait rien sinon
-        ajouterColon(colon2); //De meme pour le colon2
+        /*ajouterColon(colon1); //Permet d'ajouter le colon1 à la colonie si ce nest pas deja fait, ne fait rien sinon
+        ajouterColon(colon2); //De meme pour le colon2*/ //test louis
         relations.get(colon1).add(colon2); //ajoute le colon2 à la liste de mauvaise relation de colon1
         relations.get(colon2).add(colon1); //l'énoncé demande des relations symetriques, donc on fait de meme pour colon2
     }
@@ -101,7 +119,7 @@ public class Colonie {
         colon2.setRessourceAttribue(r);
     }
 
-    public void remplirPreferences(char x){
+    /*public void remplirPreferences(char x){
         Scanner scan = new Scanner(System.in); //Créé un scanner.
         Colon colon = null;
 
@@ -139,5 +157,5 @@ public class Colonie {
         } else {
             System.out.println("Colon non trouvé.");
         }
-    }
+    }*/
 }

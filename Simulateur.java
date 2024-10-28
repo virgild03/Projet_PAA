@@ -1,84 +1,147 @@
 package projet_paa;
 
-import java.util.Scanner;
-
+import java.util.*;
 
 public class Simulateur {
-    /*
-    Permet d'executer les instructions données dans l'énoncé de la partie 1
-     */
-    public static int cout; //Permet d'initialiser un cout (jalousie) à 0 lors de la création du simulateur. 
-    
-    
-    public static void main(String[] args)
-    {
-        /*
-        CONSTRUCTION DE COLONIE
-         */
+
+    public static int cout; //Permet d'initialiser un cout (jalousie) à 0 lors de la création du simulateur.
+
+    public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
 
-        System.out.println("Nombre de colon dans la colonie ? ");
-        Colonie colonie = new Colonie(sc.nextInt());
+        System.out.println("Nombre de colons dans la colonie ? ");
+        int nbColons = sc.nextInt();
+        sc.nextLine();
+        Colonie colonie = new Colonie(nbColons);
 
-        do {
-            System.out.println("Que souhaitez-vous faire ? ");
-            System.out.println("Ajouter une relation entre 2 colons ? --> 1 ");
-            System.out.println("Ajouter les préferences d'un colon ? --> 2 ");
-            System.out.println("Fin --> 0");
+        while (true) {
+            System.out.println("\nQue souhaitez-vous faire ? ");
+            System.out.println("1. Ajouter une relation entre 2 colons");
+            System.out.println("2. Ajouter les préférences d'un colon");
+            System.out.println("0. Fin de la configuration");
 
-
-            if (sc.nextInt() == 1) {
-                System.out.println("Colon 1 ?");
-                Colon colon1 = new Colon(sc.next());   /*UTILISER SCANNER Possibilité d'améliorer sans construire de nouveau colon*/
-                System.out.println("Colon 2 ?");
-                Colon colon2 = new Colon(sc.next());
-                colonie.ajouterMauvaiseRelation(colon1, colon2);
-
-            } else if (sc.nextInt() == 2) {
-
-                System.out.println("De quel colon ?");
-                char c = sc.next().charAt(0); //lit le premier caractere de la chaine entree par utilisateur. rentrer le nom du colon voulu.
-                colonie.remplirPreferences(c); //appelle la methode de colonie qui permet de remplir les prefs d'un colon
-
-            }
-
-        }while(sc.nextInt() == 0);
-
-        /*
-        CONSTRUCTION DE COLONIE TERMINEE
-         */
-
-        /*
-        AFFECTATION DES RESSOURCES
-         */
-        System.out.println("Affectation des ressources NAIVEMENT");
-        System.out.println("choisissez l'ordre des colons qui auront leur affectation avec la plus haute preference");
-        for (int i=0; i< colonie.getNbColon();i++){
-            System.out.println("choisissez un colon");
-
+            int choix = sc.nextInt();
             sc.nextLine();
-            /*
-            faire l'affectation dans l'ordre que veut l'utilisateur
-            - instancier affectation
-            - utiliser la methode affectation.affectationNaive(c) pour que le colon en parametre recoive son souhait le plus haut
 
-            Puis echange de ressource avec la methode colonie.echangerRessource
+            if (choix == 1) { //ajoute une mauvaise relation entre 2 colon
+                System.out.println("Nom du premier colon :");
+                String nom1 = sc.nextLine();
+                System.out.println("Nom du second colon :");
+                String nom2 = sc.nextLine();
 
+                Colon colon1 = trouverColon(colonie, nom1);
+                Colon colon2 = trouverColon(colonie, nom2);
 
+                if (colon1 != null && colon2 != null) {
+                    colonie.ajouterMauvaiseRelation(colon1, colon2);
+                    System.out.println("Relation ajoutée entre " + nom1 + " et " + nom2);
+                } else {
+                    System.out.println("L'un des colons n'a pas été trouvé.");
+                }
 
-            Puis le cout de jalousie qui est un attribut static de simulateur qu'il suffit d'incrementer quand les voeux
-            plus souhaités par un colon sont affectés  à un colon qui est dans son set associé dans relations de colonie.
+            } else if (choix == 2) { //ajoute les preferences d'un colon (du préféré au pire)
+                // PS: ne gère pas encore le cas où l'utilisateur entre la meme ressource en boucle
+                System.out.println("Nom du colon :");
+                String nomColon = sc.nextLine();
+                Colon colon = trouverColon(colonie, nomColon);
 
-            + ajouter attribut boolean jalousie à colon pour pouvoir afficher quel colon est jaloux
+                if (colon != null) {
+                    System.out.println("Entrez les numéros de ressources préférées de " + colon.getNomColon() + " en séparant chaque numéro par des espaces :");
+                    String[] ressourcesPref = sc.nextLine().split(" ");
 
-            enfin si l'utilisateur appuie sur fin -> System.exit(0);
-             */
+                    for (String resPref : ressourcesPref) {
+                        try {
+                            int numRes = Integer.parseInt(resPref);
+                            Ressource ressource = trouverRessource(colonie, numRes);
+                            if (ressource != null) {
+                                colon.setPreference(ressource);
+                            } else {
+                                System.out.println("Ressource " + numRes + " non trouvée.");
+                            }
+                        } catch (NumberFormatException e) {
+                            System.out.println(resPref + " n'est pas un numéro valide.");
+                        }
+                    }
+                } else {
+                    System.out.println("Colon " + nomColon + " non trouvé.");
+                }
 
+            } else if (choix == 0) {
+                break;
+            } else {
+                System.out.println("Choix invalide.");
+            }
+        }
+        //Fin de la construction de la colonie
+
+        // Affectation des ressources
+        Affectation affectation = new Affectation(colonie);
+        System.out.println("\nAffectation des ressources");
+        System.out.println("Entrez l'ordre des colons (un nom par ligne) pour l'affectation :");
+
+        for (int i = 0; i < colonie.getNbColon(); i++) {
+            String nomColon = sc.nextLine();
+            Colon colon = trouverColon(colonie, nomColon);
+
+            if (colon != null) {
+                affectation.affectationNaive(colon);
+                System.out.println("Ressource attribuée à " + colon.getNomColon() + " : " + colon.getRessourceAttribue());
+            } else {
+                System.out.println("Colon " + nomColon + " non trouvé.");
+                i--;
+            }
         }
 
+        // Calcul du cout
+        cout = 0;
+        for (Colon colon : colonie.getListeColons()) {
+            Set<Colon> mauvaisesRelations = colonie.getVoisins(colon);
+            Ressource ressourceAttribuee = colon.getRessourceAttribue();
 
+            List<Ressource> preferences = colon.getPreference();
+            int indexAttribue = preferences.indexOf(ressourceAttribuee);
 
+            if (indexAttribue == -1) {
+                indexAttribue = preferences.size();
+            }
+
+            for (int i = 0; i < indexAttribue; i++) {
+                Ressource ressourcePreferee = preferences.get(i);
+                for (Colon rival : mauvaisesRelations) {
+                    if (rival.getRessourceAttribue() != null && rival.getRessourceAttribue().equals(ressourcePreferee)) {
+                        cout++;
+                        colon.setJaloux(true); /*Le colon devient jaloux que si un autre colon avec qui il a une mauvaise relation,
+                        a une ressource qu'il aurait préféré avoir*/
+                        break;
+                    }
+                }
+            }
+        }
+
+        System.out.println("\nLe coût de jalousie est : " + cout);
+        System.out.println("Les colons jaloux sont :");
+        for (Colon colon : colonie.getListeColons()) {
+            if (colon.isJaloux()) {
+                System.out.println(colon.getNomColon());
+            }
+        }
     }
-    
-  
+
+    private static Colon trouverColon(Colonie colonie, String nom) {
+        for (Colon c : colonie.getListeColons()) {
+            if (c.getNomColon().equalsIgnoreCase(nom)) { //ignore les différences de majuscules et minuscules
+                return c;
+            }
+        }
+        return null;
+    }
+
+    private static Ressource trouverRessource(Colonie colonie, int numero) {
+        for (Ressource r : colonie.getListeRessource()) {
+            if (r.getNumeroRessource() == numero) {
+                return r;
+            }
+        }
+        return null;
+    }
 }
