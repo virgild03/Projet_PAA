@@ -29,9 +29,9 @@ public class Affectation {
     public void affectationNaive(Colon c) {
         int objetPrefDispo = 0;
         while (!affectation.containsKey(c) && objetPrefDispo < c.getPreference().size()) {/*Tant que le colon n'a pas reçu
-        de ressources et qu'il reste des préférences à vérifier*/
+        de ressource et qu'il reste des préférences à vérifier*/
             Ressource resPreferee = c.getPreference().get(objetPrefDispo);
-            if (ressourcesDisponibles.contains(resPreferee)) {/*verifie que le ressource préférée n'a pas été attribuée
+            if (ressourcesDisponibles.contains(resPreferee)) {/*verifie que la ressource préférée n'a pas été attribuée
             à un autre colon*/
                 affectation.put(c, resPreferee);//sinon lui donner sa ressource préférée
                 c.setRessourceAttribue(resPreferee);
@@ -40,13 +40,13 @@ public class Affectation {
                 objetPrefDispo++;//sinon revérifier pour la prochaine ressource préférée
             }
         }
-        if (!affectation.containsKey(c)) {//vérifie si le colon a bien reçu une ressource
-            if (!ressourcesDisponibles.isEmpty()) {
-                Ressource ressource = ressourcesDisponibles.get(0);
+        if (!affectation.containsKey(c)) { //si le colon n'a pas reçu une de ces préférences
+            if (!ressourcesDisponibles.isEmpty()) { //si il reste des ressources disponibles
+                Ressource ressource = ressourcesDisponibles.get(0); //prendre arbitrairement la première ressource disponible
                 affectation.put(c, ressource);
                 c.setRessourceAttribue(ressource);
                 ressourcesDisponibles.remove(ressource);
-            } else {
+            } else { //sinon ne pas donner de ressource au colon
                 affectation.put(c, null);
             }
         }

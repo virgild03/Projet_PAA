@@ -7,13 +7,13 @@ public class Ressource {
     Classe permettant de representer des instances de Ressources qui devront etre partagées entre les Colons
     */
     private int NumeroRessource; //Defini un numero pour la ressource instanciée
-    
-    
+
+
     public Ressource(int i) // Constructeur de la ressource
     {
         this.NumeroRessource = i;
     }
-    
+
     public int getNumeroRessource() //fonction pour recuperer le numero de la ressource instanciée
     {
         return NumeroRessource;
@@ -23,7 +23,7 @@ public class Ressource {
         this.NumeroRessource = num;
     }
 
-    public String toString() {
+    public String toString() { //affiche le numéro de la ressource
         return "Ressource " + NumeroRessource;
     }
 }
