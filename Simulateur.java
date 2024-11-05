@@ -123,6 +123,89 @@ public class Simulateur {
         for (Colon colon : colonie.getListeColons()) {
             if (colon.isJaloux()) {
                 System.out.println(colon.getNomColon());
+
+                System.out.println("est jaloux de :");
+                Set<Colon> voisins = colonie.getVoisins(colon);
+                List<String> nomsVoisins = new ArrayList<>();
+                for (Colon voisin : voisins) {
+                    nomsVoisins.add(voisin.getNomColon());
+                }
+                System.out.println(nomsVoisins);
+            }
+        }
+
+        while (true) { //menu pour echanger des ressources
+            System.out.println("\nSouhaitez vous echangez des ressources ? ");
+            System.out.println("1. Oui");
+            System.out.println("0. Non");
+
+            int choix = sc.nextInt(); //lit le choix de l'utilisateur
+            sc.nextLine();
+
+            if (choix == 1) {
+                System.out.println("Nom du premier colon :");
+                String nom1 = sc.nextLine(); //lit le nom du premier colon
+                System.out.println("Nom du second colon :");
+                String nom2 = sc.nextLine(); //lit le nom du second colon
+
+                Colon colon1 = trouverColon(colonie, nom1);
+                Colon colon2 = trouverColon(colonie, nom2);
+
+                if (colon1 != null && colon2 != null) { //vérifie que les 2 colons existent
+                    colonie.echangeRessource(colon1, colon2);
+                    System.out.println("Ressources échangéss entre " + nom1 + " et " + nom2);
+                } else { //sinon renvoie un message d'erreur
+                    System.out.println("L'un des colons n'a pas été trouvé.");
+                }
+
+            } else if (choix == 0) { //quitte le menu
+                break;
+            } else {
+                System.out.println("Choix invalide.");
+            }
+        }
+
+
+        // Calcul du cout
+        cout = 0;
+        for (Colon colon : colonie.getListeColons()) { //pour chaque colon de la colonie
+            Set<Colon> mauvaisesRelations = colonie.getVoisins(colon); //récupère les mauvaises relations du colon
+            Ressource ressourceAttribuee = colon.getRessourceAttribue(); //récupère la ressource attribuée au colon
+
+            List<Ressource> preferences = colon.getPreference(); //récupère les préférences du colon
+            int indexAttribue = preferences.indexOf(ressourceAttribuee); //récupère l'indice de la ressource attribuée dans la liste des préférences
+
+            if (indexAttribue == -1) { //si la ressource attribuée ne fait pas parti des préférences du colon
+                indexAttribue = preferences.size(); //retourne l'indice maximal
+            }
+
+            //pour chaque ressource préférée que le colon n'a pas eu, on vérifie si un rival l'a eu
+            for (int i = 0; i < indexAttribue; i++) {
+                Ressource ressourcePreferee = preferences.get(i);
+                for (Colon rival : mauvaisesRelations) {
+                    if (rival.getRessourceAttribue() != null && rival.getRessourceAttribue().equals(ressourcePreferee)) {
+                        cout++;
+                        colon.setJaloux(true); /*Le colon devient jaloux que si un autre colon avec qui il a une mauvaise relation,
+                        a une ressource qu'il aurait préféré avoir*/
+                        break;
+                    }
+                }
+            }
+        }
+
+        System.out.println("\nLe coût de jalousie est : " + cout);
+        System.out.println("Les colons jaloux sont :");
+        for (Colon colon : colonie.getListeColons()) {
+            if (colon.isJaloux()) {
+                System.out.println(colon.getNomColon());
+
+                System.out.println("est jaloux de :");
+                Set<Colon> voisins = colonie.getVoisins(colon);
+                List<String> nomsVoisins = new ArrayList<>();
+                for (Colon voisin : voisins) {
+                    nomsVoisins.add(voisin.getNomColon());
+                }
+                System.out.println(nomsVoisins);
             }
         }
     }
