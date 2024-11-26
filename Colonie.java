@@ -76,23 +76,49 @@ public class Colonie {
     Renvoie true si les deux colons en parametres entretiennent une MAUVAISE relation
     sinon false.
     */
-    public boolean ontMauvaiseRelation(Colon colon1, Colon colon2) {
-        return relations.get(colon1).contains(colon2);
+    public boolean ontMauvaiseRelation(Colon colon1, Colon colon2) throws ColonException{
+        if (colon1 != null && colon2 != null)
+        {
+            return relations.get(colon1).contains(colon2);
+        }
+        else
+        {
+            //Gestion du cas où le colon n'existe pas.
+            throw new ColonException("l'un des colons est inexistant");
+        }
+        
     }
 
 
     /*
     permet de récupérer l'ensemble des colons avec lesquels un colon donné en parametre a une relation "ne s'aiment pas"
     */
-    public Set<Colon> getVoisins(Colon colon) {
-        return relations.get(colon);
+    public Set<Colon> getVoisins(Colon colon) throws ColonException{
+        if (colon != null)
+        {
+            return relations.get(colon);
+        }
+        else 
+        {
+            //Gestion du cas où le colon n'existe pas.
+            throw new ColonException("le colon est inexistant.");
+        }
     }
 
 
     /*permet d'échanger les ressources entre deux colons*/
-    public void echangeRessource(Colon colon1, Colon colon2) {
-        Ressource r = colon1.getRessourceAttribue();
-        colon1.setRessourceAttribue(colon2.getRessourceAttribue());
-        colon2.setRessourceAttribue(r);
+    public void echangeRessource(Colon colon1, Colon colon2) throws ColonException {
+        if (colon1 != null && colon2 != null)
+        {
+            Ressource r = colon1.getRessourceAttribue();
+            colon1.setRessourceAttribue(colon2.getRessourceAttribue());
+            colon2.setRessourceAttribue(r);
+        }
+        else
+        {
+            //Gestion du cas où le colon n'existe pas.
+            throw new ColonException("l'un des colons est inexistant");
+        }
+        
     }
 }
