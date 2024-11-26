@@ -5,14 +5,48 @@ import java.util.*;
 public class Simulateur {
 
     public static int cout; //Permet d'initialiser un cout (jalousie) à 0 lors de la création du simulateur.
+    public  static HashMap<Colon, Ressource> affectation; //association des ressources aux colon avec un Dictionnaire.
+    public static ArrayList<Ressource> ressourcesDisponibles; //liste des ressources dispo
+    
+    public static void affectationNaive(Colon c) {
+        int objetPrefDispo = 0;
+        while (!affectation.containsKey(c) && objetPrefDispo < c.getPreference().size()) {
+        /*Tant que le colon n'a pas reçu
+        de ressource et qu'il reste des préférences à vérifier*/
+            Ressource resPreferee = c.getPreference().get(objetPrefDispo);
+            if (ressourcesDisponibles.contains(resPreferee)) {/*verifie que la ressource préférée n'a pas été attribuée
+            à un autre colon*/
+                affectation.put(c, resPreferee);//sinon lui donner sa ressource préférée
+                c.setRessourceAttribue(resPreferee);
+                ressourcesDisponibles.remove(resPreferee);
+            } else {
+                objetPrefDispo++;//sinon revérifier pour la prochaine ressource préférée
+            }
+        }
+        if (!affectation.containsKey(c)) { //si le colon n'a pas reçu une de ces préférences
+            if (!ressourcesDisponibles.isEmpty()) { //si il reste des ressources disponibles
+                Ressource ressource = ressourcesDisponibles.get(0); //prendre arbitrairement la première ressource disponible
+                affectation.put(c, ressource);
+                c.setRessourceAttribue(ressource);
+                ressourcesDisponibles.remove(ressource);
+            } else { //sinon ne pas donner de ressource au colon
+                affectation.put(c, null);
+            }
+        }
+    }
 
-    public static void main(String[] args) {
+
+
+    public static void main(String[] args) throws ColonException {
+        //Ajout de la prise en compte de ColonException pour les methodes appelées ci dessous.
+        affectation = new HashMap<>(); //créé la hashmap
         Scanner sc = new Scanner(System.in);
 
         System.out.println("Nombre de colons dans la colonie ? ");
         int nbColons = sc.nextInt(); //lit le nombre de colons
         sc.nextLine();
         Colonie colonie = new Colonie(nbColons);//initialise une colonie
+        ressourcesDisponibles = new ArrayList<>(colonie.getListeRessource()); //créé la liste des ressources dispo.
 
         while (true) { //menu pour l'utilisateur
             System.out.println("\nQue souhaitez-vous faire ? ");
@@ -74,7 +108,14 @@ public class Simulateur {
         //Fin de la construction de la colonie
 
         // Affectation des ressources
-        Affectation affectation = new Affectation(colonie); //initialise les affectations Colon / Ressource de la colonie
+        /*
+        this.ressourcesDisponibles = new ArrayList<>(colonie.getListeRessource());
+        System.out.println("\nAffectation des ressources");
+        System.out.println("Entrez l'ordre des colons (un nom par ligne) pour l'affectation :");
+        
+
+        */
+        
         System.out.println("\nAffectation des ressources");
         System.out.println("Entrez l'ordre des colons (un nom par ligne) pour l'affectation :");
 
@@ -83,10 +124,19 @@ public class Simulateur {
             Colon colon = trouverColon(colonie, nomColon); //récupère le colon associé
 
             if (colon != null) { //si le colon existe
-                affectation.affectationNaive(colon); //effectue l'affectation naïve
+                affectationNaive(colon); //effectue l'affectation naïve
                 System.out.println("Ressource attribuée à " + colon.getNomColon() + " : " + colon.getRessourceAttribue());
             } else { //sinon renvoie un message d'erreur
                 System.out.println("Colon " + nomColon + " non trouvé.");
+                try{
+                    /*
+                    Gestion de l'erreur si un colon rentré est nul.
+                    */
+                    throw new ColonException("Colon est nul !");                
+                }
+                catch(ColonException e){
+                    System.out.println("Colon nul : " + e.getMessage());
+                }
                 i--; //l'utilsateur peut redonner un nom valable
             }
         }
