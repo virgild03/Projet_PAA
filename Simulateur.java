@@ -1,6 +1,7 @@
 package projet_paa;
 
 import java.util.*;
+import java.io.*;
 
 public class Simulateur {
 
@@ -31,6 +32,91 @@ public class Simulateur {
                 ressourcesDisponibles.remove(ressource);
             } else { //sinon ne pas donner de ressource au colon
                 affectation.put(c, null);
+            }
+        }
+    }
+    
+    /*
+    methode pour la partie 2 du projet.
+    Sert à initialiser un colon via un fichier txt donné en parametre.
+    */
+    public static void configurationColonieFichierTxt(String fichier) throws IOException, IllegalArgumentException, ColonException
+    {
+        Colonie colonie = new Colonie();
+        String nom = null; //nom du colon à la lecture du fichier txt
+        String nomR = null;
+        String nom1 = null;
+        String nom2 = null;
+        Colon c1 = null;
+        Colon c2 = null;
+        int compteurRessource = 1;
+        Colon c; //pour manipuler la création de colon
+        try (BufferedReader br = new BufferedReader(new FileReader(fichier))) //bufferedReader pour lire fichier
+        {
+            String ligne;
+            
+            while((ligne = br.readLine()) != null) //Tant qu'il y a des lignes 
+            {
+                if(ligne.startsWith("colon")) //Si ligne commence par colon
+                {
+                    if(nom != null)
+                    {
+                        throw new IllegalArgumentException("Il ne peut pas y avoir deux lignes pour le nom");
+                    }
+                    nom = ligne.split("()")[1].trim();
+                    c = new Colon(nom);
+                    colonie.addListeColons(c);
+                    nom = null;
+                }
+                
+                if(ligne.startsWith("ressource"))
+                {
+                    if(nomR != null)
+                    {
+                        throw new IllegalArgumentException("Il ne peut pas y avoir deux lignes pour le nom de ressource");
+                    }
+                    nomR = ligne.split("()")[1].trim();
+                    Ressource r = new Ressource(compteurRessource, nomR);
+                    colonie.addListeRessource(r);
+                    compteurRessource ++;
+                    nomR = null;
+                }
+                
+                if(ligne.startsWith("deteste"))
+                {
+                    if(nom1 != null || nom2 != null)
+                    {
+                        throw new IllegalArgumentException("Il ne peut pas y avoir deux lignes pour les noms de colons qui se detestent");
+                    }
+                    nom1 = ligne.split("(,)")[1].trim();
+                    nom2 = ligne.split("(,)")[2].trim();
+                    for(Colon colon : colonie.getListeColons())
+                    {
+                        if(nom1.equals(colon.getNomColon()))
+                        {
+                            c1 = colon;
+                        }
+                        if(nom2.equals(colon.getNomColon()))
+                        {
+                            c2 = colon;
+                        }
+                    }
+                    if(c1 != null && c2 != null)
+                    {
+                        colonie.ajouterMauvaiseRelation(c1, c2);
+                    }
+                    else
+                    {
+                        throw new ColonException("Pas de colon à ce nom enregistré");
+                    }
+                    
+                }
+                if (ligne.startsWith("preferences"))
+                {
+                    //Remplir avec les preferences données la ArrayList de preferences du nom colon donné en premier apres la parenthese.
+                }
+                
+                //Gerer les cas ou il y a un nombre de colons differents de celui des ressources etc...
             }
         }
     }
@@ -100,7 +186,8 @@ public class Simulateur {
                 }
 
             } else if (choix == 0) { //quitte le menu
-                break;
+                //SI Tous les colons ont des preferences on fait le break, sinon message qu'il manque des preferences
+                break; //
             } else {
                 System.out.println("Choix invalide.");
             }
