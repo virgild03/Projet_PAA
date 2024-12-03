@@ -1,4 +1,5 @@
 
+
 package projet_paa;
 
 import java.util.*;
@@ -37,7 +38,13 @@ public class Colonie {
             listeRessource.add(ressource); //ajoute la ressource créée à la liste des ressources
         }
     }
-
+    
+    public Colonie()
+    {
+        this.listeRessource = new ArrayList<>();
+        this.listeColons = new ArrayList<>();
+        this.relations = new HashMap<>();
+    }
     private String genererNomColon(int index) { //génère un nom pour un colon (A, B, ...)
         StringBuilder nom = new StringBuilder();
         index++;
@@ -54,6 +61,11 @@ public class Colonie {
     public ArrayList<Ressource> getListeRessource() {
         return listeRessource;
     }
+    
+    public void addListeRessource(Ressource r)
+    {
+        listeRessource.add(r);
+    }
 
     public int getNbColon() {
         return nbColon;
@@ -61,6 +73,11 @@ public class Colonie {
 
     public ArrayList<Colon> getListeColons() {
         return listeColons;
+    }
+    
+    public void addListeColons(Colon c)
+    {
+        listeColons.add(c);
     }
 
     /*
