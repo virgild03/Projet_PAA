@@ -39,34 +39,39 @@ public class Simulateur {
     /*
     methode pour la partie 2 du projet.
     Sert à initialiser un colon via un fichier txt donné en parametre.
+    nom : pour le nom du colon à récuperer
+    nomR : pour le nom de la ressource
+    nom1 & nom2 : pour lire le nom des colons et ajouter mauvaise relation.
+    c1 & c2 : pour affecter instance de colons avec les noms : nom1 et nom2.
     */
     public static void configurationColonieFichierTxt(String fichier) throws IOException, IllegalArgumentException, ColonException
     {
+        //initialisation des variables
         Colonie colonie = new Colonie();
         String nom = null; //nom du colon à la lecture du fichier txt
-        String nomR = null;
-        String nom1 = null;
-        String nom2 = null;
-        Colon c1 = null;
-        Colon c2 = null;
-        int compteurRessource = 1;
+        String nomR = null; //nom ressource
+        String nom1 = null; //nom à recuperer pour les colons et prendre en compte leur mauvaise relation
+        String nom2 = null; //nom à recuperer pour les colons et prendre en compte leur mauvaise relation
+        Colon c1 = null; //instance pour les colons qui auront le nom nom1 ou nom2
+        Colon c2 = null; //instance pour les colons qui auront le nom nom1 ou nom2
+        int compteurRessource = 1; //pour affecter un numero de ressource car la classe Ressource implique un numero. Ajout egalement d'un nom de ressource pour la partie 2 du projet.
         Colon c; //pour manipuler la création de colon
         try (BufferedReader br = new BufferedReader(new FileReader(fichier))) //bufferedReader pour lire fichier
         {
-            String ligne;
+            String ligne; //pour lire la ligne
             
             while((ligne = br.readLine()) != null) //Tant qu'il y a des lignes 
             {
                 if(ligne.startsWith("colon")) //Si ligne commence par colon
                 {
-                    if(nom != null)
+                    if(nom != null) //Vérifie si nom est déjà assigné
                     {
                         throw new IllegalArgumentException("Il ne peut pas y avoir deux lignes pour le nom");
                     }
-                    nom = ligne.split("()")[1].trim();
-                    c = new Colon(nom);
-                    colonie.addListeColons(c);
-                    nom = null;
+                    nom = ligne.split("()")[1].trim(); //assigne le nom lu par le br à nom pour creer une instance
+                    c = new Colon(nom); //creation instance
+                    colonie.addListeColons(c); //ajout le nouveau colon à la colonie courante
+                    nom = null; //désaffecte le nom pour pouvoir passer à la ligne suivante
                 }
                 
                 if(ligne.startsWith("ressource"))
