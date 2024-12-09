@@ -79,6 +79,7 @@ public class Colonie {
     {
         listeColons.add(c);
         relations.put(c, new HashSet<>());
+        nbColon = listeColons.size(); //Fait en sorte que nbColon est bien mis à jour
     }
 
     /*
