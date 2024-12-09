@@ -111,8 +111,7 @@ public class Simulateur {
                     }
                     
                 }
-                if (ligne.startsWith("preferences"))
-                {
+                if(ligne.startsWith("preferences")) {
                     //Remplir avec les preferences données la ArrayList de preferences du nom colon donné en premier apres la parenthese.
                 }
                 
@@ -187,7 +186,21 @@ public class Simulateur {
 
             } else if (choix == 0) { //quitte le menu
                 //SI Tous les colons ont des preferences on fait le break, sinon message qu'il manque des preferences
-                break; //
+
+                ArrayList<String> nomColonRestant = new ArrayList<>(); // Permet de renvoyer les noms des colons sans préférence
+
+                //Parcours de la liste de colon pour vérifier leur preference
+                for(int i=0; i< nbColons;i++){
+                   if(colonie.getListeColons().get(i).getPreference().isEmpty()){
+                       nomColonRestant.add(colonie.getListeColons().get(i).getNomColon()); // Si pas de preference pour le colon
+                    }
+               }
+
+                if(nomColonRestant.isEmpty()){
+                    break;
+                } else {
+                    System.out.println("\nLes colons  "+nomColonRestant +" n'ont pas encore reçu de préférence, obligatoire pour terminer la configuration !!!");
+                }
             } else {
                 System.out.println("Choix invalide.");
             }

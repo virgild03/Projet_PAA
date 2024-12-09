@@ -17,6 +17,7 @@ public class Colon {
     {
         this.nomColon = n;
         preference = new ArrayList<>();
+        ressourceAttribuee = null;
     }
 
     public String getNomColon() //fonction pour recuperer le nom ailleur
