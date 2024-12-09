@@ -78,6 +78,7 @@ public class Colonie {
     public void addListeColons(Colon c)
     {
         listeColons.add(c);
+        relations.put(c, new HashSet<>());
     }
 
     /*

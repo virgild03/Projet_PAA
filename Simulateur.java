@@ -44,57 +44,89 @@ public class Simulateur {
     nom1 & nom2 : pour lire le nom des colons et ajouter mauvaise relation.
     c1 & c2 : pour affecter instance de colons avec les noms : nom1 et nom2.
     */
-    public static void configurationColonieFichierTxt(String fichier) throws IOException, IllegalArgumentException, ColonException
+    public static Colonie configurationColonieFichierTxt(String fichier) throws IOException, IllegalArgumentException, ColonException
     {
         //initialisation des variables
         Colonie colonie = new Colonie();
-        String nom = null; //nom du colon à la lecture du fichier txt
-        String nomR = null; //nom ressource
-        String nom1 = null; //nom à recuperer pour les colons et prendre en compte leur mauvaise relation
-        String nom2 = null; //nom à recuperer pour les colons et prendre en compte leur mauvaise relation
-        Colon c1 = null; //instance pour les colons qui auront le nom nom1 ou nom2
-        Colon c2 = null; //instance pour les colons qui auront le nom nom1 ou nom2
-        int compteurRessource = 1; //pour affecter un numero de ressource car la classe Ressource implique un numero. Ajout egalement d'un nom de ressource pour la partie 2 du projet.
-        Colon c; //pour manipuler la création de colon
+
+        boolean trueColon = false; //Permet de savoir quand on a fini les lignes sur les colons
+        boolean trueRessource = false; //Permet de savoir quand on a fini les lignes sur les ressources
+        boolean trueDeteste = false; //Permet de savoir quand on a fini les lignes sur les relations
+
         try (BufferedReader br = new BufferedReader(new FileReader(fichier))) //bufferedReader pour lire fichier
         {
             String ligne; //pour lire la ligne
             
-            while((ligne = br.readLine()) != null) //Tant qu'il y a des lignes 
+            while((ligne = br.readLine()) != null) //Tant qu'il y a des lignes
             {
-                if(ligne.startsWith("colon")) //Si ligne commence par colon
+                ligne = ligne.trim(); //Pour que la chaine de caractères soit propre même si il y a des espaces en trop
+
+                if (ligne.isEmpty()){
+                    continue; //On ignore la ligne si elle est vide
+                }
+
+                else if(ligne.startsWith("colon(")) //Si ligne commence par colon
                 {
-                    if(nom != null) //Vérifie si nom est déjà assigné
-                    {
-                        throw new IllegalArgumentException("Il ne peut pas y avoir deux lignes pour le nom");
+                    if (trueRessource || trueDeteste){ //Vérifie qu'on a les lignes dans le bon ordre
+                        throw new IllegalArgumentException("L'ordre des lignes n'est pas respecté");
                     }
-                    nom = ligne.split("()")[1].trim(); //assigne le nom lu par le br à nom pour creer une instance
-                    c = new Colon(nom); //creation instance
+
+                    int start = ligne.indexOf("("); //On prend la partie de la phrase entre "(" et ")."
+                    int end = ligne.indexOf(").");
+                    if (start == - 1 || end == -1){ //Erreur si "(" ou ")." n'a pas été trouvé
+                        throw new IllegalArgumentException("La ligne doit respecter le bon format 1 !");
+                    }
+
+                    String nomColon = ligne.substring(start+1, end).trim(); //Prend la chaine de caractère présente entre start et end
+
+                    Colon c = new Colon(nomColon); //creation instance
                     colonie.addListeColons(c); //ajout le nouveau colon à la colonie courante
-                    nom = null; //désaffecte le nom pour pouvoir passer à la ligne suivante
+
                 }
                 
-                if(ligne.startsWith("ressource"))
+                else if (ligne.startsWith("ressource("))
                 {
-                    if(nomR != null)
-                    {
-                        throw new IllegalArgumentException("Il ne peut pas y avoir deux lignes pour le nom de ressource");
+                    if (trueDeteste){ //Vérifie qu'on a les lignes dans le bon ordre
+                        throw new IllegalArgumentException("L'ordre des lignes n'est pas respecté");
                     }
-                    nomR = ligne.split("()")[1].trim();
-                    Ressource r = new Ressource(compteurRessource, nomR);
+
+                    trueColon = true; //Vrai si on a bien traité tous les colons
+
+                    int start = ligne.indexOf("(");
+                    int end = ligne.indexOf(").");
+                    if (start == - 1 || end == -1){
+                        throw new IllegalArgumentException("La ligne doit respecter le bon format 2 !");
+                    }
+
+                    String nomR = ligne.substring(start+1, end).trim();
+                    int numero = colonie.getListeRessource().size() + 1;
+
+                    Ressource r = new Ressource(numero, nomR);
                     colonie.addListeRessource(r);
-                    compteurRessource ++;
-                    nomR = null;
+
                 }
                 
-                if(ligne.startsWith("deteste"))
+                else if(ligne.startsWith("deteste("))
                 {
-                    if(nom1 != null || nom2 != null)
-                    {
-                        throw new IllegalArgumentException("Il ne peut pas y avoir deux lignes pour les noms de colons qui se detestent");
+                    trueRessource = true;
+
+                    int start = ligne.indexOf("(");
+                    int end = ligne.indexOf(").");
+                    if (start == - 1 || end == -1){
+                        throw new IllegalArgumentException("La ligne doit respecter le bon format 3 !");
                     }
-                    nom1 = ligne.split("(,)")[1].trim();
-                    nom2 = ligne.split("(,)")[2].trim();
+
+                    String str = ligne.substring(start+1, end).trim();
+                    String[] noms = str.split(","); //Crée un tableau avec le nom des deux colons
+                    if (noms.length != 2){ //Vérifie qu'on a bien 2 noms dans le tableau
+                        throw new IllegalArgumentException("La ligne doit respecter le bon format 4 !");
+                    }
+                    String nom1 = noms[0].trim(); //Récupère les deux noms
+                    String nom2 = noms[1].trim();
+
+                    Colon c1 = null;
+                    Colon c2 = null;
+
                     for(Colon colon : colonie.getListeColons())
                     {
                         if(nom1.equals(colon.getNomColon()))
@@ -116,13 +148,60 @@ public class Simulateur {
                     }
                     
                 }
-                if(ligne.startsWith("preferences")) {
-                    //Remplir avec les preferences données la ArrayList de preferences du nom colon donné en premier apres la parenthese.
+                else if(ligne.startsWith("preferences(")) {
+
+                    trueDeteste = true;
+
+                    int start = ligne.indexOf("(");
+                    int end = ligne.indexOf(").");
+                    if (start == - 1 || end == -1){
+                        throw new IllegalArgumentException("La ligne doit respecter le bon format 5 !");
+                    }
+
+                    String str = ligne.substring(start+1, end).trim();
+
+                    String[] noms = str.split(",");
+                    if (noms.length < 2){
+                        System.out.println("a : " + noms[0]);
+                        System.out.println("a : " + noms[1]);
+                        throw new IllegalArgumentException("La ligne doit respecter le bon format 6 !");
+                    }
+
+                    String nomColon = noms[0].trim();
+                    Colon c = null;
+                    for (Colon col : colonie.getListeColons()){
+                        if (col.getNomColon().equals(nomColon)){ //Si le colon existe on l'enregistre dans "c"
+                            c = col;
+                            break;
+                        }
+                    }
+
+                    if (c == null){ //Erreur si le colon n'existe pas
+                        throw new ColonException("Colon introuvable !");
+                    }
+
+                    //Pour chaque ressource de la ligne
+                    for (int i = 1; i < noms.length; i++){ //On commence à i = 1 car i = 0 correspond au nom du colon
+                        String nomR = noms[i].trim();
+                        Ressource ressourceActuelle = null;
+                        for (Ressource r : colonie.getListeRessource()){ //Si la ressource existe alors elle est assigné à "ressourceActuelle"
+                            if (r.getNomRessource() != null && r.getNomRessource().equals(nomR)){
+                                ressourceActuelle = r;
+                                break;
+                            }
+                        }
+                        if (ressourceActuelle == null){ //Erreur si la ressource n'existe pas
+                            throw new IllegalArgumentException("La ressource actuelle n'existe pas !");
+                        }
+                        c.setPreference(ressourceActuelle); //Ajout de la ressource aux preferences du colon
+                    }
                 }
-                
-                //Gerer les cas ou il y a un nombre de colons differents de celui des ressources etc...
+                else {
+                    throw new IllegalArgumentException("Cette ligne n'est pas dans le bon format !");
+                }
             }
         }
+        return colonie;
     }
 
 
@@ -130,97 +209,122 @@ public class Simulateur {
     public static void main(String[] args) throws ColonException {
         //Ajout de la prise en compte de ColonException pour les methodes appelées ci dessous.
         affectation = new HashMap<>(); //créé la hashmap
-        Scanner sc = new Scanner(System.in);
 
-        System.out.println("Nombre de colons dans la colonie ? ");
-        int nbColons = sc.nextInt(); //lit le nombre de colons
-        sc.nextLine();
-        Colonie colonie = new Colonie(nbColons);//initialise une colonie
-        ressourcesDisponibles = new ArrayList<>(colonie.getListeRessource()); //créé la liste des ressources dispo.
+        Scanner sc = new Scanner(System.in);
+        Colonie colonie = null;
 
         while (true) { //menu pour l'utilisateur
             System.out.println("\nQue souhaitez-vous faire ? ");
-            System.out.println("1. Ajouter une relation entre 2 colons");
-            System.out.println("2. Ajouter les préférences d'un colon");
-            System.out.println("0. Fin de la configuration");
+            System.out.println("1. Construction de la colonie via un fichier");
+            System.out.println("2. Construction de la colonie à la main");
 
             int choix = sc.nextInt(); //lit le choix de l'utilisateur
             sc.nextLine();
 
-            if (choix == 1) { //ajoute une mauvaise relation entre 2 colon
-                System.out.println("Nom du premier colon :");
-                String nom1 = sc.nextLine(); //lit le nom du premier colon
-                System.out.println("Nom du second colon :");
-                String nom2 = sc.nextLine(); //lit le nom du second colon
+            if (choix == 1) {
+                System.out.println("Entrez le chemin du fichier de configuration de la colonie : ");
+                String nomFichier = sc.nextLine();
 
-                Colon colon1 = trouverColon(colonie, nom1); //récupère le premier colon
-                Colon colon2 = trouverColon(colonie, nom2); //récupère le second colon
-
-                if (colon1 != null && colon2 != null) { //vérifie que les 2 colons existent
-                    colonie.ajouterMauvaiseRelation(colon1, colon2);
-                    System.out.println("Relation ajoutée entre " + nom1 + " et " + nom2);
-                } else { //sinon renvoie un message d'erreur
-                    System.out.println("L'un des colons n'a pas été trouvé.");
-                }
-
-            } else if (choix == 2) { //ajoute les preferences d'un colon (du préféré au pire)
-                System.out.println("Nom du colon :");
-                String nomColon = sc.nextLine(); //lit le nom du colon
-                Colon colon = trouverColon(colonie, nomColon); //récupère le colon
-
-                if (colon != null) { //si le colon existe
-                    System.out.println("Entrez les numéros de ressources préférées de " + colon.getNomColon() + " en séparant chaque numéro par des espaces :");
-                    String[] ressourcesPref = sc.nextLine().split(" "); //crée un tableau avec les préférences du colon
-
-                    for (String resPref : ressourcesPref) {
-                        try {
-                            int numRes = Integer.parseInt(resPref); //convertit le numéro de la ressource de String à entier
-                            Ressource ressource = trouverRessource(colonie, numRes); //récupère la ressource associée
-                            if (ressource != null) { //si la ressource existe
-                                colon.setPreference(ressource); //met à jour la préférence du colon
-                            } else { //sinon renvoie un message d'erreur
-                                System.out.println("Ressource " + numRes + " non trouvée.");
-                            }
-                        } catch (NumberFormatException e) { //si le numéro entré n'est pas valide
-                            System.out.println(resPref + " n'est pas un numéro valide.");
-                        }
-                    }
-                } else { //sinon renvoie un message d'erreur
-                    System.out.println("Colon " + nomColon + " non trouvé.");
-                }
-
-            } else if (choix == 0) { //quitte le menu
-                //SI Tous les colons ont des preferences on fait le break, sinon message qu'il manque des preferences
-
-                ArrayList<String> nomColonRestant = new ArrayList<>(); // Permet de renvoyer les noms des colons sans préférence
-
-                //Parcours de la liste de colon pour vérifier leur preference
-                for(int i=0; i< nbColons;i++){
-                   if(colonie.getListeColons().get(i).getPreference().isEmpty()){
-                       nomColonRestant.add(colonie.getListeColons().get(i).getNomColon()); // Si pas de preference pour le colon
-                    }
-               }
-
-                if(nomColonRestant.isEmpty()){
+                try {
+                    colonie = configurationColonieFichierTxt(nomFichier);
                     break;
-                } else {
-                    System.out.println("\nLes colons  "+nomColonRestant +" n'ont pas encore reçu de préférence, obligatoire pour terminer la configuration !!!");
+                } catch (Exception e) {
+                    System.out.println("Erreur lors de la configuration de la colonie : " + e.getMessage());
                 }
-            } else {
-                System.out.println("Choix invalide.");
+
+            } else if (choix == 2) {
+                System.out.println("Nombre de colons dans la colonie ? ");
+                int nbColons = sc.nextInt(); //lit le nombre de colons
+                sc.nextLine();
+                colonie = new Colonie(nbColons);//initialise une colonie
+                ressourcesDisponibles = new ArrayList<>(colonie.getListeRessource()); //créé la liste des ressources dispo.
+
+                while (true) { //menu pour l'utilisateur
+                    System.out.println("\nQue souhaitez-vous faire ? ");
+                    System.out.println("1. Ajouter une relation entre 2 colons");
+                    System.out.println("2. Ajouter les préférences d'un colon");
+                    System.out.println("0. Fin de la configuration");
+
+                    int choix2 = sc.nextInt(); //lit le choix de l'utilisateur
+                    sc.nextLine();
+
+                    if (choix2 == 1) { //ajoute une mauvaise relation entre 2 colon
+                        System.out.println("Nom du premier colon :");
+                        String nom1 = sc.nextLine(); //lit le nom du premier colon
+                        System.out.println("Nom du second colon :");
+                        String nom2 = sc.nextLine(); //lit le nom du second colon
+
+                        Colon colon1 = trouverColon(colonie, nom1); //récupère le premier colon
+                        Colon colon2 = trouverColon(colonie, nom2); //récupère le second colon
+
+                        if (colon1 != null && colon2 != null) { //vérifie que les 2 colons existent
+                            colonie.ajouterMauvaiseRelation(colon1, colon2);
+                            System.out.println("Relation ajoutée entre " + nom1 + " et " + nom2);
+                        } else { //sinon renvoie un message d'erreur
+                            System.out.println("L'un des colons n'a pas été trouvé.");
+                        }
+
+                    } else if (choix2 == 2) { //ajoute les preferences d'un colon (du préféré au pire)
+                        System.out.println("Nom du colon :");
+                        String nomColon = sc.nextLine(); //lit le nom du colon
+                        Colon colon = trouverColon(colonie, nomColon); //récupère le colon
+
+                        if (colon != null) { //si le colon existe
+                            System.out.println("Entrez les numéros de ressources préférées de " + colon.getNomColon() + " en séparant chaque numéro par des espaces :");
+                            String[] ressourcesPref = sc.nextLine().split(" "); //crée un tableau avec les préférences du colon
+
+                            for (String resPref : ressourcesPref) {
+                                try {
+                                    int numRes = Integer.parseInt(resPref); //convertit le numéro de la ressource de String à entier
+                                    Ressource ressource = trouverRessource(colonie, numRes); //récupère la ressource associée
+                                    if (ressource != null) { //si la ressource existe
+                                        colon.setPreference(ressource); //met à jour la préférence du colon
+                                    } else { //sinon renvoie un message d'erreur
+                                        System.out.println("Ressource " + numRes + " non trouvée.");
+                                    }
+                                } catch (NumberFormatException e) { //si le numéro entré n'est pas valide
+                                    System.out.println(resPref + " n'est pas un numéro valide.");
+                                }
+                            }
+                        } else { //sinon renvoie un message d'erreur
+                            System.out.println("Colon " + nomColon + " non trouvé.");
+                        }
+
+                    } else if (choix2 == 0) { //quitte le menu
+                        //SI Tous les colons ont des preferences on fait le break, sinon message qu'il manque des preferences
+
+                        ArrayList<String> nomColonRestant = new ArrayList<>(); // Permet de renvoyer les noms des colons sans préférence
+
+                        //Parcours de la liste de colon pour vérifier leur preference
+                        for (int i = 0; i < nbColons; i++) {
+                            if (colonie.getListeColons().get(i).getPreference().isEmpty()) {
+                                nomColonRestant.add(colonie.getListeColons().get(i).getNomColon()); // Si pas de preference pour le colon
+                            }
+                        }
+
+                        if (nomColonRestant.isEmpty()) {
+                            break;
+                        } else {
+                            System.out.println("\nLes colons  " + nomColonRestant + " n'ont pas encore reçu de préférence, obligatoire pour terminer la configuration !!!");
+                        }
+                    } else {
+                        System.out.println("Choix invalide.");
+                    }
+                }
             }
         }
         //Fin de la construction de la colonie
+
+
 
         // Affectation des ressources
         /*
         this.ressourcesDisponibles = new ArrayList<>(colonie.getListeRessource());
         System.out.println("\nAffectation des ressources");
         System.out.println("Entrez l'ordre des colons (un nom par ligne) pour l'affectation :");
-        
-
         */
-        
+
+        ressourcesDisponibles = new ArrayList<>(colonie.getListeRessource());
         System.out.println("\nAffectation des ressources");
         System.out.println("Entrez l'ordre des colons (un nom par ligne) pour l'affectation :");
 
