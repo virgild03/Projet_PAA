@@ -205,6 +205,94 @@ public class Simulateur {
     }
 
 
+    /*
+       Méthode qui renvoie une HashMap<Colon, Ressource> telle que:
+       - Pour chaque colon, la ressource associée dans la HashMap correspond
+         à une affectation minimisant le coût de jalousie.
+       - Chaque ressource est affectée à un unique colon.
+       - Lorsqu'on teste une nouvelle ressource pour un colon, on procède à un échange
+         avec le colon qui la détient déjà (si besoin).
+   */
+    public static HashMap<Colon, Ressource> affectationAutomatique(Colonie colonie) throws ColonException {
+        ArrayList<Colon> listeColons = colonie.getListeColons();
+        ArrayList<Ressource> listeRessources = colonie.getListeRessource();
+
+        // Affectation initiale : on associe chaque colon à la ressource correspondante par l'indice
+        HashMap<Colon, Ressource> affectationLocale = new HashMap<>();
+        for (int i = 0; i < listeColons.size(); i++) {
+            Colon colonCourant = listeColons.get(i);
+            Ressource ressourceInitiale = listeRessources.get(i);
+            affectationLocale.put(colonCourant, ressourceInitiale);
+            colonCourant.setRessourceAttribue(ressourceInitiale);
+        }
+
+        int coutTemporaire = calculerCout(colonie);
+
+        // Tentative d'améliorer l'affectation
+        for(int i = 0; i < listeColons.size(); i++) {
+            for(int j = 0; j < listeRessources.size(); j++) {
+                Colon colonCourant = listeColons.get(i);
+                Ressource ressourceCourante = affectationLocale.get(colonCourant);
+                Ressource ressourceCandidate = listeRessources.get(j);
+
+                // On ne tente l'échange que si la ressource candidate est différente de la ressource courante du colon
+                if (!ressourceCandidate.equals(ressourceCourante)) {
+                    // Trouver le colon qui possède actuellement la ressource candidate
+                    Colon autreColon = null;
+
+                    /*
+                    boucle pour rechercher autreColon à qui est associé la ressource ressourceCandidate.
+                    Nouveau concept : Map.Entry.
+                    C'est une interface en java qui permet de parcourir les clé-valeurs d'une hashmap.
+                    entrySet() est une méthode de Map qui retourne un ensemble (de type Set) de toutes les paires clé-valeur présentes dans la hashmap affectationLocale.
+                    getKey() retourne la clé : un colon dans notre cas.
+                    getValue() retourne une valeur : une ressource dans notre cas.
+                     */
+                    for (Map.Entry<Colon, Ressource> entry : affectationLocale.entrySet()) //Pour toutes les "clé-valeurs" dans affectationLocale
+                    {
+                        if (entry.getValue().equals(ressourceCandidate))  //Si une valeur de "clé-valeurs" = ressourceCandidate
+                        {
+                            autreColon = entry.getKey(); //autreColon devient la clé qui correspond à la valeur ressourceCandidate
+                            break; //évitons de boucler pour rien tout de meme, la planète a des ressources limitées !
+                        }
+                    }
+
+                    // S'il existe un autre colon détenant déjà la ressourceCandidate, on tente un échange
+                    if (autreColon != null && !autreColon.equals(colonCourant)) {
+                        // Sauvegarde de l'état initial avant l'échange
+                        Ressource ancienneRessourceAutreColon = affectationLocale.get(autreColon);
+
+                        // Échange : le colon courant prend la ressource candidate, l'autre colon prend la ressource courante
+                        affectationLocale.put(colonCourant, ressourceCandidate);
+                        colonCourant.setRessourceAttribue(ressourceCandidate);
+
+                        affectationLocale.put(autreColon, ressourceCourante);
+                        autreColon.setRessourceAttribue(ressourceCourante);
+
+                        // Calcul du coût après l'échange
+                        int nouveauCout = calculerCout(colonie);
+
+                        // Si le coût ne baisse pas on revient à l'état initial (échange inverse).
+                        if (nouveauCout >= coutTemporaire) {
+                            affectationLocale.put(colonCourant, ressourceCourante);
+                            colonCourant.setRessourceAttribue(ressourceCourante);
+
+                            affectationLocale.put(autreColon, ancienneRessourceAutreColon);
+                            autreColon.setRessourceAttribue(ancienneRessourceAutreColon);
+                        } else {
+                            // Le coût s'est amélioré, on met à jour coutTemporaire
+                            coutTemporaire = nouveauCout;
+                        }
+                    }
+                }
+            }
+        }
+
+        // La HashMap affectationLocale contient maintenant l'affectation minimisée
+        return affectationLocale;
+    }
+
+
 
     public static void main(String[] args) throws ColonException {
         //Ajout de la prise en compte de ColonException pour les methodes appelées ci dessous.
@@ -317,12 +405,7 @@ public class Simulateur {
 
 
 
-        // Affectation des ressources
-        /*
-        this.ressourcesDisponibles = new ArrayList<>(colonie.getListeRessource());
-        System.out.println("\nAffectation des ressources");
-        System.out.println("Entrez l'ordre des colons (un nom par ligne) pour l'affectation :");
-        */
+
 
         ressourcesDisponibles = new ArrayList<>(colonie.getListeRessource());
         System.out.println("\nAffectation des ressources");
@@ -351,31 +434,9 @@ public class Simulateur {
         }
 
         // Calcul du cout
-        cout = 0;
-        for (Colon colon : colonie.getListeColons()) { //pour chaque colon de la colonie
-            Set<Colon> mauvaisesRelations = colonie.getVoisins(colon); //récupère les mauvaises relations du colon
-            Ressource ressourceAttribuee = colon.getRessourceAttribue(); //récupère la ressource attribuée au colon
+        //Les lignes de codes precedemment placées ici sont déplacées plus bas dans une methode calculerCout(c);
+        cout = calculerCout(colonie);
 
-            List<Ressource> preferences = colon.getPreference(); //récupère les préférences du colon
-            int indexAttribue = preferences.indexOf(ressourceAttribuee); //récupère l'indice de la ressource attribuée dans la liste des préférences
-
-            if (indexAttribue == -1) { //si la ressource attribuée ne fait pas parti des préférences du colon
-                indexAttribue = preferences.size(); //retourne l'indice maximal
-            }
-
-            //pour chaque ressource préférée que le colon n'a pas eu, on vérifie si un rival l'a eu
-            for (int i = 0; i < indexAttribue; i++) {
-                Ressource ressourcePreferee = preferences.get(i);
-                for (Colon rival : mauvaisesRelations) {
-                    if (rival.getRessourceAttribue() != null && rival.getRessourceAttribue().equals(ressourcePreferee)) {
-                        cout++;
-                        colon.setJaloux(true); /*Le colon devient jaloux que si un autre colon avec qui il a une mauvaise relation,
-                        a une ressource qu'il aurait préféré avoir*/
-                        break;
-                    }
-                }
-            }
-        }
 
         System.out.println("\nLe coût de jalousie est : " + cout);
         System.out.println("Les colons jaloux sont :");
@@ -424,6 +485,9 @@ public class Simulateur {
             }
         }
 
+/*
+
+CODE DUPLIQUé JE NE SAIS POURQUOI ON EST JUSTE DES DEBILES PARDON
 
         // Calcul du cout
         cout = 0;
@@ -444,8 +508,8 @@ public class Simulateur {
                 for (Colon rival : mauvaisesRelations) {
                     if (rival.getRessourceAttribue() != null && rival.getRessourceAttribue().equals(ressourcePreferee)) {
                         cout++;
-                        colon.setJaloux(true); /*Le colon devient jaloux que si un autre colon avec qui il a une mauvaise relation,
-                        a une ressource qu'il aurait préféré avoir*/
+                        colon.setJaloux(true); //Le colon devient jaloux que si un autre colon avec qui il a une mauvaise relation,
+                        //a une ressource qu'il aurait préféré avoir
                         break;
                     }
                 }
@@ -467,7 +531,44 @@ public class Simulateur {
                 System.out.println(nomsVoisins);
             }
         }
+
+ */
     }
+    public static int calculerCout(Colonie colonie) throws ColonException {
+        int cout = 0; // Initialisation du coût à 0
+
+        for (Colon colon : colonie.getListeColons()) { // Pour chaque colon de la colonie
+            Set<Colon> mauvaisesRelations = colonie.getVoisins(colon); // Récupère les mauvaises relations du colon
+            Ressource ressourceAttribuee = colon.getRessourceAttribue(); // Récupère la ressource attribuée au colon
+
+            List<Ressource> preferences = colon.getPreference(); // Récupère les préférences du colon
+            int indexAttribue = preferences.indexOf(ressourceAttribuee); // Indice de la ressource attribuée dans les préférences
+
+            // Si la ressource attribuée ne fait pas partie des préférences
+            if (indexAttribue == -1) {
+                indexAttribue = preferences.size(); // Indice maximal
+            }
+
+            // Pour chaque ressource préférée non attribuée
+            for (int i = 0; i < indexAttribue; i++) {
+                Ressource ressourcePreferee = preferences.get(i);
+
+                // Vérifier si un rival (mauvaise relation) a obtenu cette ressource préférée
+                for (Colon rival : mauvaisesRelations) {
+                    if (rival.getRessourceAttribue() != null &&
+                            rival.getRessourceAttribue().equals(ressourcePreferee)) {
+
+                        cout++; // Incrémente le coût
+                        colon.setJaloux(true); // Le colon devient jaloux
+                        break; // Arrête la vérification pour cette ressource préférée
+                    }
+                }
+            }
+        }
+        return cout; // Retourne le coût total
+    }
+
+
 
     //vérifie si un colon appartient bien à la colonie
     private static Colon trouverColon(Colonie colonie, String nom) {
