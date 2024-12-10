@@ -206,7 +206,7 @@ public class Simulateur {
 
 
     /*
-       Méthode qui renvoie une HashMap<Colon, Ressource> telle que:
+        Méthode qui renvoie une HashMap<Colon, Ressource> telle que:
        - Pour chaque colon, la ressource associée dans la HashMap correspond
          à une affectation minimisant le coût de jalousie.
        - Chaque ressource est affectée à un unique colon.
