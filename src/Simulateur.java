@@ -1,4 +1,4 @@
-package projet_paa;
+package projet_paa.src;
 
 import java.util.*;
 import java.io.*;
