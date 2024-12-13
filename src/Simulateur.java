@@ -1,49 +1,17 @@
-package projet_paa.src;
+package projet_paa;
 
 import java.util.*;
 import java.io.*;
 
 public class Simulateur {
-
+	
     public static int cout; //Permet d'initialiser un cout (jalousie) à 0 lors de la création du simulateur.
-    public  static HashMap<Colon, Ressource> affectation; //association des ressources aux colon avec un Dictionnaire.
-    public static ArrayList<Ressource> ressourcesDisponibles; //liste des ressources dispo
-    
-    public static void affectationNaive(Colon c) {
-        int objetPrefDispo = 0;
-        while (!affectation.containsKey(c) && objetPrefDispo < c.getPreference().size()) {
-        /*Tant que le colon n'a pas reçu
-        de ressource et qu'il reste des préférences à vérifier*/
-            Ressource resPreferee = c.getPreference().get(objetPrefDispo);
-            if (ressourcesDisponibles.contains(resPreferee)) {/*verifie que la ressource préférée n'a pas été attribuée
-            à un autre colon*/
-                affectation.put(c, resPreferee);//sinon lui donner sa ressource préférée
-                c.setRessourceAttribue(resPreferee);
-                ressourcesDisponibles.remove(resPreferee);
-            } else {
-                objetPrefDispo++;//sinon revérifier pour la prochaine ressource préférée
-            }
-        }
-        if (!affectation.containsKey(c)) { //si le colon n'a pas reçu une de ces préférences
-            if (!ressourcesDisponibles.isEmpty()) { //si il reste des ressources disponibles
-                Ressource ressource = ressourcesDisponibles.get(0); //prendre arbitrairement la première ressource disponible
-                affectation.put(c, ressource);
-                c.setRessourceAttribue(ressource);
-                ressourcesDisponibles.remove(ressource);
-            } else { //sinon ne pas donner de ressource au colon
-                affectation.put(c, null);
-            }
-        }
-    }
     
     /*
     methode pour la partie 2 du projet.
     Sert à initialiser un colon via un fichier txt donné en parametre.
-    nom : pour le nom du colon à récuperer
-    nomR : pour le nom de la ressource
-    nom1 & nom2 : pour lire le nom des colons et ajouter mauvaise relation.
-    c1 & c2 : pour affecter instance de colons avec les noms : nom1 et nom2.
     */
+	
     public static Colonie configurationColonieFichierTxt(String fichier) throws IOException, IllegalArgumentException, ColonException
     {
         //initialisation des variables
@@ -205,102 +173,8 @@ public class Simulateur {
     }
 
 
-    /*
-        Méthode qui renvoie une HashMap<Colon, Ressource> telle que:
-       - Pour chaque colon, la ressource associée dans la HashMap correspond
-         à une affectation minimisant le coût de jalousie.
-       - Chaque ressource est affectée à un unique colon.
-       - Lorsqu'on teste une nouvelle ressource pour un colon, on procède à un échange
-         avec le colon qui la détient déjà (si besoin).
-   */
-    public static HashMap<Colon, Ressource> affectationAutomatique(Colonie colonie) throws ColonException {
-        ArrayList<Colon> listeColons = colonie.getListeColons();
-        ArrayList<Ressource> listeRessources = colonie.getListeRessource();
-
-        // Affectation initiale : on associe chaque colon à la ressource correspondante par l'indice
-        HashMap<Colon, Ressource> affectationLocale = new HashMap<>();
-        for (int i = 0; i < listeColons.size(); i++) {
-            Colon colonCourant = listeColons.get(i);
-            Ressource ressourceInitiale = listeRessources.get(i);
-            affectationLocale.put(colonCourant, ressourceInitiale);
-            colonCourant.setRessourceAttribue(ressourceInitiale);
-        }
-
-        int coutTemporaire = colonie.calculerCout();
-
-        // Tentative d'améliorer l'affectation
-        for(int i = 0; i < listeColons.size(); i++) {
-            for(int j = 0; j < listeRessources.size(); j++) {
-                Colon colonCourant = listeColons.get(i);
-                Ressource ressourceCourante = affectationLocale.get(colonCourant);
-                Ressource ressourceCandidate = listeRessources.get(j);
-
-                // On ne tente l'échange que si la ressource candidate est différente de la ressource courante du colon
-                if (!ressourceCandidate.equals(ressourceCourante)) {
-                    // Trouver le colon qui possède actuellement la ressource candidate
-                    Colon autreColon = null;
-
-                    /*
-                    boucle pour rechercher autreColon à qui est associé la ressource ressourceCandidate.
-                    Nouveau concept : Map.Entry.
-                    C'est une interface en java qui permet de parcourir les clé-valeurs d'une hashmap.
-                    entrySet() est une méthode de Map qui retourne un ensemble (de type Set) de toutes les paires clé-valeur présentes dans la hashmap affectationLocale.
-                    getKey() retourne la clé : un colon dans notre cas.
-                    getValue() retourne une valeur : une ressource dans notre cas.
-                     */
-                    for (Map.Entry<Colon, Ressource> entry : affectationLocale.entrySet()) //Pour toutes les "clé-valeurs" dans affectationLocale
-                    {
-                        if (entry.getValue().equals(ressourceCandidate))  //Si une valeur de "clé-valeurs" = ressourceCandidate
-                        {
-                            autreColon = entry.getKey(); //autreColon devient la clé qui correspond à la valeur ressourceCandidate
-                            break; //évitons de boucler pour rien tout de meme, la planète a des ressources limitées !
-                        }
-                    }
-
-                    // S'il existe un autre colon détenant déjà la ressourceCandidate, on tente un échange
-                    if (autreColon != null && !autreColon.equals(colonCourant)) {
-                        // Sauvegarde de l'état initial avant l'échange
-                        Ressource ancienneRessourceAutreColon = affectationLocale.get(autreColon);
-
-                        // Échange : le colon courant prend la ressource candidate, l'autre colon prend la ressource courante
-                        affectationLocale.put(colonCourant, ressourceCandidate);
-                        colonCourant.setRessourceAttribue(ressourceCandidate);
-
-                        affectationLocale.put(autreColon, ressourceCourante);
-                        autreColon.setRessourceAttribue(ressourceCourante);
-
-                        // Calcul du coût après l'échange
-                        int nouveauCout = colonie.calculerCout();
-
-                        // Si le coût ne baisse pas on revient à l'état initial (échange inverse).
-                        if (nouveauCout >= coutTemporaire) {
-                            affectationLocale.put(colonCourant, ressourceCourante);
-                            colonCourant.setRessourceAttribue(ressourceCourante);
-
-                            affectationLocale.put(autreColon, ancienneRessourceAutreColon);
-                            autreColon.setRessourceAttribue(ancienneRessourceAutreColon);
-                        } else {
-                            // Le coût s'est amélioré, on met à jour coutTemporaire
-                            coutTemporaire = nouveauCout;
-                        }
-                    }
-                }
-            }
-        }
-
-        // La HashMap affectationLocale contient maintenant l'affectation minimisée
-        return affectationLocale;
-    }
-
-
-
-
-
-
-
     public static void main(String[] args) throws ColonException {
         //Ajout de la prise en compte de ColonException pour les methodes appelées ci dessous.
-        affectation = new HashMap<>(); //créé la hashmap
         Scanner sc = new Scanner(System.in);
         Colonie colonie = null;
 
@@ -321,10 +195,11 @@ public class Simulateur {
                 int choix3 = sc.nextInt();
                 sc.nextLine();
                 if (choix3 == 1 && colonie != null) {
-                    affectation = affectationAutomatique(colonie);
+                    Affectation.init(colonie); 
+                    Affectation.affectationAutomatique(colonie);
                 }
                 if (choix3 == 2 && colonie != null) {
-                    sauvegarde(affectation);
+                    Affectation.sauvegarde(Affectation.affectation);
                 }
                 if (choix3 == 3 && colonie != null) {
                     break;
@@ -336,7 +211,6 @@ public class Simulateur {
             int nbColons = sc.nextInt(); //lit le nombre de colons
             sc.nextLine();
             colonie = new Colonie(nbColons);//initialise une colonie
-            ressourcesDisponibles = new ArrayList<>(colonie.getListeRessource()); //créé la liste des ressources dispo.
 
             while (true) { //menu pour l'utilisateur
                 System.out.println("\nQue souhaitez-vous faire ? ");
@@ -416,37 +290,42 @@ public class Simulateur {
 
 
 
+        if(args.length<=0){
+            Affectation.init(colonie);
+            System.out.println("\nAffectation des ressources");
+            System.out.println("Entrez l'ordre des colons (un nom par ligne) pour l'affectation :");
 
-        ressourcesDisponibles = new ArrayList<>(colonie.getListeRessource());
-        System.out.println("\nAffectation des ressources");
-        System.out.println("Entrez l'ordre des colons (un nom par ligne) pour l'affectation :");
+            for (int i = 0; i < colonie.getNbColon(); i++) {
+                String nomColon = sc.nextLine(); //lit le nom du colon
+                Colon colon = colonie.trouverColon(nomColon); //récupère le colon associé
 
-        for (int i = 0; i < colonie.getNbColon(); i++) {
-            String nomColon = sc.nextLine(); //lit le nom du colon
-            Colon colon = colonie.trouverColon(nomColon); //récupère le colon associé
-
-            if (colon != null) { //si le colon existe
-                affectationNaive(colon); //effectue l'affectation naïve
-                System.out.println("Ressource attribuée à " + colon.getNomColon() + " : " + colon.getRessourceAttribue());
-            } else { //sinon renvoie un message d'erreur
-                System.out.println("Colon " + nomColon + " non trouvé.");
-                try{
-                    /*
-                    Gestion de l'erreur si un colon rentré est nul.
-                    */
-                    throw new ColonException("Colon est nul !");                
+                if (colon != null) { //si le colon existe
+                    Affectation.affectationNaive(colon); //effectue l'affectation naïve
+                    System.out.println("Ressource attribuée à " + colon.getNomColon() + " : " + colon.getRessourceAttribue());
+                } else { //sinon renvoie un message d'erreur
+                    System.out.println("Colon " + nomColon + " non trouvé.");
+                    try{
+                        /*
+                        Gestion de l'erreur si un colon rentré est nul.
+                        */
+                        throw new ColonException("Colon est nul !");                
+                    }
+                    catch(ColonException e){
+                        System.out.println("Colon nul : " + e.getMessage());
+                    }
+                    i--; //l'utilsateur peut redonner un nom valable
                 }
-                catch(ColonException e){
-                    System.out.println("Colon nul : " + e.getMessage());
-                }
-                i--; //l'utilsateur peut redonner un nom valable
-            }
+            } 	
         }
 
         // Calcul du cout
+        
+        for (Colon colon : colonie.getListeColons()) {
+            colon.setJaloux(false);
+        }
         //Les lignes de codes precedemment placées ici sont déplacées plus bas dans une methode calculerCout(c);
         cout = colonie.calculerCout();
-
+        Affectation.cout = cout;
 
         System.out.println("\nLe coût de jalousie est : " + cout);
         System.out.println("Les colons jaloux sont :");
@@ -495,39 +374,7 @@ public class Simulateur {
             }
         }
 
-/*
 
-CODE DUPLIQUé JE NE SAIS POURQUOI ON EST JUSTE DES DEBILES PARDON
-
- */
     }
 
-
-    public static void sauvegarde(HashMap<Colon, Ressource> map){
-
-        if(map.isEmpty()){
-            System.out.println("Il faut affecter les ressources aux colons avant de pouvoir sauvegarder !!!");
-        }
-        else {
-            System.out.println("\nChemin du fichier dans lequel il faut sauvegarder la colonie ? ");
-            Scanner sc = new Scanner(System.in);
-            String chemin = sc.nextLine();
-
-            try( PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(chemin)))) {
-
-                for(Map.Entry<Colon,Ressource> entry : map.entrySet()){
-                    Colon c = entry.getKey();
-                    Ressource ressource = entry.getValue();
-                    System.out.println(c.getNomColon());
-                    System.out.println(ressource);
-                    pw.println(c.getNomColon()+":"+ressource.getNomRessource());
-                }
-            }
-            catch(IOException e) {
-                System.err.println(e.getMessage());
-                System.exit(1);
-            }
-            System.out.println("La sauvegarde à été effectuée !!!");
-        }
-    }
 }
