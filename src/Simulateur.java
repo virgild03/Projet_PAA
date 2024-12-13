@@ -192,34 +192,72 @@ public class Simulateur {
                 System.out.println("2) Sauvegarder la solution actuelle");
                 System.out.println("3) Fin");
 
-                int choix3 = sc.nextInt();
-                sc.nextLine();
+                String input = sc.nextLine(); //On récupère une chaine de caractère
+                int choix3;
+               
+                //Pour gérer le cas où l'utilisateur rentre une chaine de caractère dans le menu
+
+                try {
+					choix3 = Integer.parseInt(input); //Essaye de le convertir en entier
+                } catch (NumberFormatException e) {
+                    System.out.println("Choix invalide.");
+                    continue; //Relance le menu
+                }
+                
                 if (choix3 == 1 && colonie != null) {
                     Affectation.init(colonie); 
                     Affectation.affectationAutomatique(colonie);
                 }
-                if (choix3 == 2 && colonie != null) {
+                else if (choix3 == 2 && colonie != null) {
                     Affectation.sauvegarde(Affectation.affectation);
                 }
-                if (choix3 == 3 && colonie != null) {
+                else if (choix3 == 3 && colonie != null) {
                     break;
-                }
+            	} else {
+            		System.out.println("Choix invalide.");
+            	}
             }
 
         } else{
-            System.out.println("Nombre de colons dans la colonie ? ");
-            int nbColons = sc.nextInt(); //lit le nombre de colons
-            sc.nextLine();
-            colonie = new Colonie(nbColons);//initialise une colonie
+            System.out.println("Nombre de colons dans la colonie ?");
+            int nbColons;
+
+            while (true) { //Jusqu'à ce que l'utilisateur entre une valeur valide
+                try {
+                    String input = sc.nextLine(); //lit le nombre de colons
+                    nbColons = Integer.parseInt(input);
+
+                    if (nbColons < 0) { //Vérifie si la valeur est négative
+                        System.out.println("Le nombre de colons doit être un entier positif. Essayez encore :");
+                        continue; //Recommencer la boucle
+                    }
+
+                    break;
+                } catch (NumberFormatException e) {
+                    System.out.println("Entrée invalide. Veuillez entrer un entier positif :");
+                }
+            }
+
+            colonie = new Colonie(nbColons); //Initialise la colonie
+            
 
             while (true) { //menu pour l'utilisateur
                 System.out.println("\nQue souhaitez-vous faire ? ");
                 System.out.println("1. Ajouter une relation entre 2 colons");
                 System.out.println("2. Ajouter les préférences d'un colon");
                 System.out.println("0. Fin de la configuration");
+                
+                String input = sc.nextLine(); //On récupère une chaine de caractère
+                int choix2;
+               
+                //Pour gérer le cas où l'utilisateur rentre une chaine de caractère dans le menu
 
-                int choix2 = sc.nextInt(); //lit le choix de l'utilisateur
-                sc.nextLine();
+                try {
+					choix2 = Integer.parseInt(input); //Essaye de le convertir en entier
+                } catch (NumberFormatException e) {
+                    System.out.println("Choix invalide.");
+                    continue; //Relance le menu
+                }
 
                 if (choix2 == 1) { //ajoute une mauvaise relation entre 2 colon
                     System.out.println("Nom du premier colon :");
@@ -308,7 +346,7 @@ public class Simulateur {
                         /*
                         Gestion de l'erreur si un colon rentré est nul.
                         */
-                        throw new ColonException("Colon est nul !");                
+                        throw new ColonException("Ce colon n'existe pas !");                
                     }
                     catch(ColonException e){
                         System.out.println("Colon nul : " + e.getMessage());
@@ -348,8 +386,17 @@ public class Simulateur {
             System.out.println("1. Oui");
             System.out.println("0. Non");
 
-            int choix = sc.nextInt(); //lit le choix de l'utilisateur
-            sc.nextLine();
+            String input = sc.nextLine(); //On récupère une chaine de caractère
+            int choix;
+           
+            //Pour gérer le cas où l'utilisateur rentre une chaine de caractère dans le menu
+
+            try {
+				choix = Integer.parseInt(input); //Essaye de le convertir en entier
+            } catch (NumberFormatException e) {
+                System.out.println("Choix invalide.");
+                continue; //Relance le menu
+            }
 
             if (choix == 1) {
                 System.out.println("Nom du premier colon :");
@@ -362,9 +409,32 @@ public class Simulateur {
 
                 if (colon1 != null && colon2 != null) { //vérifie que les 2 colons existent
                     colonie.echangeRessource(colon1, colon2);
-                    System.out.println("Ressources échangéss entre " + nom1 + " et " + nom2);
+                    System.out.println("Ressources échangées entre " + nom1 + " et " + nom2);
                 } else { //sinon renvoie un message d'erreur
                     System.out.println("L'un des colons n'a pas été trouvé.");
+                }
+                
+                for (Colon colon : colonie.getListeColons()) {
+                    colon.setJaloux(false);
+                }
+                //Les lignes de codes precedemment placées ici sont déplacées plus bas dans une methode calculerCout(c);
+                cout = colonie.calculerCout();
+                Affectation.cout = cout;
+
+                System.out.println("\nLe coût de jalousie est : " + cout);
+                System.out.println("Les colons jaloux sont :");
+                for (Colon colon : colonie.getListeColons()) {
+                    if (colon.isJaloux()) {
+                        System.out.println(colon.getNomColon());
+
+                        System.out.println("est jaloux de :");
+                        Set<Colon> voisins = colonie.getVoisins(colon);
+                        List<String> nomsVoisins = new ArrayList<>();
+                        for (Colon voisin : voisins) {
+                            nomsVoisins.add(voisin.getNomColon());
+                        }
+                        System.out.println(nomsVoisins);
+                    }
                 }
 
             } else if (choix == 0) { //quitte le menu

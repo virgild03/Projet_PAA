@@ -131,7 +131,7 @@ public static HashMap<Colon, Ressource> affectationAutomatique(Colonie colonie) 
     
 	public static void sauvegarde(HashMap<Colon, Ressource> map){
 
-		if(map.isEmpty()){
+		if(map == null || map.isEmpty()){
 			System.out.println("Il faut affecter les ressources aux colons avant de pouvoir sauvegarder !!!");
 		}
 		else {
