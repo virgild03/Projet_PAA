@@ -55,33 +55,50 @@ public class Affectation {
         ArrayList<Ressource> listeRessources = colonie.getListeRessource();
         affectation = new HashMap<>();
 
-        // Affectation initiale : on associe chaque colon à la ressource correspondante par l'indice
-        for (int i = 0; i < listeColons.size(); i++) {
-            Colon colonCourant = listeColons.get(i);
-            Ressource ressourceInitiale = listeRessources.get(i);
-            affectation.put(colonCourant, ressourceInitiale);
-            colonCourant.setRessourceAttribue(ressourceInitiale);
+        // Affectation naïve selon les préférences :
+        // Pour chaque colon, on parcourt ses ressources préférées dans l'ordre et on lui assigne
+        // la première ressource encore disponible.
+        List<Ressource> ressourcesDisponibles = new ArrayList<>(listeRessources);
+        for (Colon colon : listeColons) {
+            boolean assigne = false;
+            for (Ressource pref : colon.getPreference()) {
+                if (ressourcesDisponibles.contains(pref)) {
+                    affectation.put(colon, pref);
+                    colon.setRessourceAttribue(pref);
+                    ressourcesDisponibles.remove(pref);
+                    assigne = true;
+                    break;
+                }
+            }
+            // Si on n'a pas pu assigner une ressource préférée (cas improbable, puisque le nb ress = nb colons),
+            // on assigne une ressource quelconque (dernière chance)
+            if (!assigne && !ressourcesDisponibles.isEmpty()) {
+                Ressource r = ressourcesDisponibles.remove(0);
+                affectation.put(colon, r);
+                colon.setRessourceAttribue(r);
+            }
         }
 
         int coutTemporaire = colonie.calculerCout();
-        int nbIterations = 100000; // Nombre d'itérations d'amélioration (modifiable)
+        int nbIterations = 10000; // Nombre d'itérations d'amélioration (modulable)
 
-        // Boucle externe pour tenter d'améliorer la solution sur plusieurs passes
         for (int iteration = 0; iteration < nbIterations; iteration++) {
-            boolean amelioration = false; // Pour savoir si on a amélioré la solution lors de cette itération
+            boolean amelioration = false;
 
-            // Boucle interne sur colons et ressources
+            // On mélange l'ordre des colons et ressources à chaque itération
+            // pour explorer d'autres configurations et éviter les minima locaux
+            Collections.shuffle(listeColons);
+            Collections.shuffle(listeRessources);
+
             for (int i = 0; i < listeColons.size(); i++) {
                 for (int j = 0; j < listeRessources.size(); j++) {
                     Colon colonCourant = listeColons.get(i);
                     Ressource ressourceCourante = affectation.get(colonCourant);
                     Ressource ressourceCandidate = listeRessources.get(j);
 
-                    // On ne tente l'échange que si la ressource candidate est différente
                     if (!ressourceCandidate.equals(ressourceCourante)) {
-                        // Trouver le colon qui possède actuellement la ressource candidate
+                        // Trouver le colon qui a la ressource candidate
                         Colon autreColon = null;
-
                         for (Map.Entry<Colon, Ressource> entry : affectation.entrySet()) {
                             if (entry.getValue().equals(ressourceCandidate)) {
                                 autreColon = entry.getKey();
@@ -89,9 +106,8 @@ public class Affectation {
                             }
                         }
 
-                        // S'il existe un autre colon détenant déjà la ressourceCandidate, on tente un échange
+                        // Tenter l'échange
                         if (autreColon != null && !autreColon.equals(colonCourant)) {
-                            // Sauvegarde de l'état initial avant l'échange
                             Ressource ancienneRessourceAutreColon = affectation.get(autreColon);
 
                             // Échange
@@ -101,35 +117,39 @@ public class Affectation {
                             affectation.put(autreColon, ressourceCourante);
                             autreColon.setRessourceAttribue(ressourceCourante);
 
-                            // Calcul du coût après l'échange
                             int nouveauCout = colonie.calculerCout();
 
-                            // Si le coût ne baisse pas, on revient à l'état initial
                             if (nouveauCout >= coutTemporaire) {
+                                // On annule l'échange si pas d'amélioration
                                 affectation.put(colonCourant, ressourceCourante);
                                 colonCourant.setRessourceAttribue(ressourceCourante);
 
                                 affectation.put(autreColon, ancienneRessourceAutreColon);
                                 autreColon.setRessourceAttribue(ancienneRessourceAutreColon);
                             } else {
-                                // Le coût s'est amélioré, on met à jour coutTemporaire
+                                // Amélioration
                                 coutTemporaire = nouveauCout;
                                 amelioration = true;
+
+                                // Optionnel : si on atteint le coût minimal, on peut arrêter
+                                if (coutTemporaire == 1) {
+                                    return affectation;
+                                }
                             }
                         }
                     }
                 }
             }
 
-            // Si aucune amélioration n'a été trouvée lors de cette itération, on peut stopper plus tôt
             if (!amelioration) {
+                // Plus aucune amélioration n'est possible
                 break;
             }
         }
 
-        // La HashMap affectation contient maintenant une affectation améliorée
         return affectation;
     }
+
 
 
 
