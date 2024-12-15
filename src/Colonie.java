@@ -167,36 +167,35 @@ public class Colonie {
 
 
     public int calculerCout() throws ColonException {
-        int cout = 0; // Initialisation du coût à 0
+        int cout = 0;
 
-        for (Colon colon : getListeColons()) { // Pour chaque colon de la colonie
-            Set<Colon> mauvaisesRelations = getVoisins(colon); // Récupère les mauvaises relations du colon
-            Ressource ressourceAttribuee = colon.getRessourceAttribue(); // Récupère la ressource attribuée au colon
+        for (Colon colon : getListeColons()) {
+            Set<Colon> mauvaisesRelations = getVoisins(colon);
+            Ressource ressourceAttribuee = colon.getRessourceAttribue();
+            List<Ressource> preferences = colon.getPreference();
 
-            List<Ressource> preferences = colon.getPreference(); // Récupère les préférences du colon
-            int indexAttribue = preferences.indexOf(ressourceAttribuee); // Indice de la ressource attribuée dans les préférences
-
-            // Si la ressource attribuée ne fait pas partie des préférences
+            int indexAttribue = preferences.indexOf(ressourceAttribuee);
             if (indexAttribue == -1) {
-                indexAttribue = preferences.size(); // Indice maximal
+                indexAttribue = preferences.size();
             }
 
-            // Pour chaque ressource préférée non attribuée
-            for (int i = 0; i < indexAttribue; i++) {
+            boolean estJaloux = false;
+            for (int i = 0; i < indexAttribue && !estJaloux; i++) {
                 Ressource ressourcePreferee = preferences.get(i);
 
-                // Vérifier si un rival (mauvaise relation) a obtenu cette ressource préférée
                 for (Colon rival : mauvaisesRelations) {
                     if (rival.getRessourceAttribue() != null &&
                             rival.getRessourceAttribue().equals(ressourcePreferee)) {
 
-                        cout++; // Incrémente le coût
-                        colon.setJaloux(true); // Le colon devient jaloux
-                        break; // Arrête la vérification pour cette ressource préférée
+                        cout++;
+                        colon.setJaloux(true);
+                        estJaloux = true;
+                        break; // Sort de la boucle 'rival'
                     }
                 }
             }
         }
+
         return cout; // Retourne le coût total
     }
 }

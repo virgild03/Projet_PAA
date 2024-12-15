@@ -14,12 +14,15 @@ public class Simulateur {
 	
     public static Colonie configurationColonieFichierTxt(String fichier) throws IOException, IllegalArgumentException, ColonException
     {
+
+        VerifFichierTxt vft = new VerifFichierTxt(); //instancier
+        vft.verifFichierTxt(fichier); //appel de la methode qui va analyser la conformité du fichier.
         //initialisation des variables
         Colonie colonie = new Colonie();
 
-        boolean trueColon = false; //Permet de savoir quand on a fini les lignes sur les colons
-        boolean trueRessource = false; //Permet de savoir quand on a fini les lignes sur les ressources
-        boolean trueDeteste = false; //Permet de savoir quand on a fini les lignes sur les relations
+        //boolean trueColon = false; //Permet de savoir quand on a fini les lignes sur les colons
+        //boolean trueRessource = false; //Permet de savoir quand on a fini les lignes sur les ressources
+        //boolean trueDeteste = false; //Permet de savoir quand on a fini les lignes sur les relations
 
         try (BufferedReader br = new BufferedReader(new FileReader(fichier))) //bufferedReader pour lire fichier
         {
@@ -35,15 +38,15 @@ public class Simulateur {
 
                 else if(ligne.startsWith("colon(")) //Si ligne commence par colon
                 {
-                    if (trueRessource || trueDeteste){ //Vérifie qu'on a les lignes dans le bon ordre
-                        throw new IllegalArgumentException("L'ordre des lignes n'est pas respecté");
-                    }
+                    //if (trueRessource || trueDeteste){ //Vérifie qu'on a les lignes dans le bon ordre
+                    //    throw new IllegalArgumentException("L'ordre des lignes n'est pas respecté");
+                    //}
 
                     int start = ligne.indexOf("("); //On prend la partie de la phrase entre "(" et ")."
                     int end = ligne.indexOf(").");
-                    if (start == - 1 || end == -1){ //Erreur si "(" ou ")." n'a pas été trouvé
-                        throw new IllegalArgumentException("La ligne doit respecter le bon format 1 !");
-                    }
+                    //if (start == - 1 || end == -1){ //Erreur si "(" ou ")." n'a pas été trouvé
+                    //    throw new IllegalArgumentException("La ligne doit respecter le bon format 1 !");
+                    //}
 
                     String nomColon = ligne.substring(start+1, end).trim(); //Prend la chaine de caractère présente entre start et end
 
@@ -54,17 +57,17 @@ public class Simulateur {
                 
                 else if (ligne.startsWith("ressource("))
                 {
-                    if (trueDeteste){ //Vérifie qu'on a les lignes dans le bon ordre
-                        throw new IllegalArgumentException("L'ordre des lignes n'est pas respecté");
-                    }
+                    //if (trueDeteste){ //Vérifie qu'on a les lignes dans le bon ordre
+                    //    throw new IllegalArgumentException("L'ordre des lignes n'est pas respecté");
+                    //}
 
-                    trueColon = true; //Vrai si on a bien traité tous les colons
+                    //trueColon = true; //Vrai si on a bien traité tous les colons
 
                     int start = ligne.indexOf("(");
                     int end = ligne.indexOf(").");
-                    if (start == - 1 || end == -1){
-                        throw new IllegalArgumentException("La ligne doit respecter le bon format 2 !");
-                    }
+                    //if (start == - 1 || end == -1){
+                    //    throw new IllegalArgumentException("La ligne doit respecter le bon format 2 !");
+                    //}
 
                     String nomR = ligne.substring(start+1, end).trim();
                     int numero = colonie.getListeRessource().size() + 1;
@@ -76,19 +79,19 @@ public class Simulateur {
                 
                 else if(ligne.startsWith("deteste("))
                 {
-                    trueRessource = true;
+                    //trueRessource = true;
 
                     int start = ligne.indexOf("(");
                     int end = ligne.indexOf(").");
-                    if (start == - 1 || end == -1){
-                        throw new IllegalArgumentException("La ligne doit respecter le bon format 3 !");
-                    }
+                    //if (start == - 1 || end == -1){
+                    //    throw new IllegalArgumentException("La ligne doit respecter le bon format 3 !");
+                    //}
 
                     String str = ligne.substring(start+1, end).trim();
                     String[] noms = str.split(","); //Crée un tableau avec le nom des deux colons
-                    if (noms.length != 2){ //Vérifie qu'on a bien 2 noms dans le tableau
-                        throw new IllegalArgumentException("La ligne doit respecter le bon format 4 !");
-                    }
+                    //if (noms.length != 2){ //Vérifie qu'on a bien 2 noms dans le tableau
+                    //    throw new IllegalArgumentException("La ligne doit respecter le bon format 4 !");
+                    //}
                     String nom1 = noms[0].trim(); //Récupère les deux noms
                     String nom2 = noms[1].trim();
 
@@ -118,22 +121,22 @@ public class Simulateur {
                 }
                 else if(ligne.startsWith("preferences(")) {
 
-                    trueDeteste = true;
+                    //trueDeteste = true;
 
                     int start = ligne.indexOf("(");
                     int end = ligne.indexOf(").");
-                    if (start == - 1 || end == -1){
-                        throw new IllegalArgumentException("La ligne doit respecter le bon format 5 !");
-                    }
+                    //if (start == - 1 || end == -1){
+                    //    throw new IllegalArgumentException("La ligne doit respecter le bon format 5 !");
+                    //}
 
                     String str = ligne.substring(start+1, end).trim();
 
                     String[] noms = str.split(",");
-                    if (noms.length < 2){
-                        System.out.println("a : " + noms[0]);
-                        System.out.println("a : " + noms[1]);
-                        throw new IllegalArgumentException("La ligne doit respecter le bon format 6 !");
-                    }
+                    //if (noms.length < 2){
+                    //    System.out.println("a : " + noms[0]);
+                    //    System.out.println("a : " + noms[1]);
+                        //throw new IllegalArgumentException("La ligne doit respecter le bon format 6 !");
+                    //}
 
                     String nomColon = noms[0].trim();
                     Colon c = null;
@@ -144,9 +147,9 @@ public class Simulateur {
                         }
                     }
 
-                    if (c == null){ //Erreur si le colon n'existe pas
-                        throw new ColonException("Colon introuvable !");
-                    }
+                    //if (c == null){ //Erreur si le colon n'existe pas
+                    //    throw new ColonException("Colon introuvable !");
+                    //}
 
                     //Pour chaque ressource de la ligne
                     for (int i = 1; i < noms.length; i++){ //On commence à i = 1 car i = 0 correspond au nom du colon
@@ -164,13 +167,15 @@ public class Simulateur {
                         c.setPreference(ressourceActuelle); //Ajout de la ressource aux preferences du colon
                     }
                 }
-                else {
-                    throw new IllegalArgumentException("Cette ligne n'est pas dans le bon format !");
-                }
+                //else {
+                //    throw new IllegalArgumentException("Cette ligne n'est pas dans le bon format !");
+                //}
             }
         }
         return colonie;
     }
+
+
 
 
     public static void main(String[] args) throws ColonException {
@@ -205,6 +210,7 @@ public class Simulateur {
                 }
                 
                 if (choix3 == 1 && colonie != null) {
+                    cout = colonie.calculerCout();
                     Affectation.init(colonie); 
                     Affectation.affectationAutomatique(colonie);
                 }
@@ -363,7 +369,7 @@ public class Simulateur {
         }
         //Les lignes de codes precedemment placées ici sont déplacées plus bas dans une methode calculerCout(c);
         cout = colonie.calculerCout();
-        Affectation.cout = cout;
+        //Affectation.cout = cout;
 
         System.out.println("\nLe coût de jalousie est : " + cout);
         System.out.println("Les colons jaloux sont :");
@@ -419,7 +425,7 @@ public class Simulateur {
                 }
                 //Les lignes de codes precedemment placées ici sont déplacées plus bas dans une methode calculerCout(c);
                 cout = colonie.calculerCout();
-                Affectation.cout = cout;
+                //Affectation.cout = cout;
 
                 System.out.println("\nLe coût de jalousie est : " + cout);
                 System.out.println("Les colons jaloux sont :");
