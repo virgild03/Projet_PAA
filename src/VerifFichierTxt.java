@@ -108,6 +108,11 @@ public class VerifFichierTxt {
                         throw new FichierException("Erreur ligne " + numeroLigne + " : La ligne deteste doit contenir exactement deux noms.");
                     }
 
+                    if(noms[0].equals(noms[1]))
+                    {
+                        throw new FichierException("Erreur ligne "+ numeroLigne+ " : Un colon ne peut se detester lui meme malheureusement");
+                    }
+
                     for (String n : noms) {
                         n = n.trim();
                         if (!colons.contains(n)) //SI n n'est pas dans le set colons c'est que le colon n'existe pas.
