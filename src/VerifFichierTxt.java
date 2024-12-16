@@ -108,7 +108,7 @@ public class VerifFichierTxt {
                         throw new FichierException("Erreur ligne " + numeroLigne + " : La ligne deteste doit contenir exactement deux noms.");
                     }
 
-                    if(noms[0].equals(noms[1]))
+                    if(noms[0].trim().equals(noms[1].trim()))
                     {
                         throw new FichierException("Erreur ligne "+ numeroLigne+ " : Un colon ne peut se detester lui meme malheureusement");
                     }
