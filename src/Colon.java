@@ -2,6 +2,7 @@
 package projet_paa.src;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class Colon {
     
@@ -53,5 +54,23 @@ public class Colon {
 
     public String toString() {
         return "Nom du colon : " + nomColon + "\nRessources préférées : " + preference + "\nRessource attribuée : " + ressourceAttribuee + "\nEst jaloux : " + jaloux;
+    }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Colon colon = (Colon) o;
+        return Objects.equals(nomColon, colon.nomColon);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(nomColon);
+    }
+
+    public String getNomRessourceIntoColon()
+    {
+        return ressourceAttribuee.getNomRessource();
     }
 }

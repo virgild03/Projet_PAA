@@ -196,8 +196,19 @@ public class Simulateur {
                     System.out.println("1) Résolution automatique");
                     System.out.println("2) Sauvegarder la solution actuelle");
                     System.out.println("3) Fin");
-                    int choix3 = sc.nextInt();
+
                     //On récupère une chaine de caractère
+                    String input = sc.nextLine(); //On récupère une chaine de caractère
+                    int choix3;
+
+                    //Pour gérer le cas où l'utilisateur rentre une chaine de caractère dans le menu
+
+                    try {
+                        choix3 = Integer.parseInt(input); //Essaye de le convertir en entier
+                    } catch (NumberFormatException e) {
+                        System.out.println("Choix invalide.");
+                        continue; //Relance le menu
+                    }
 
 
                     if (choix3 == 1) {
@@ -383,8 +394,19 @@ public class Simulateur {
             System.out.println("\nSouhaitez vous echangez des ressources ? ");
             System.out.println("1. Oui");
             System.out.println("0. Non");
+
             //On récupère une chaine de caractère
-            int choix = sc.nextInt();
+            String input = sc.nextLine(); //On récupère une chaine de caractère
+            int choix;
+
+            //Pour gérer le cas où l'utilisateur rentre une chaine de caractère dans le menu
+
+            try {
+                choix = Integer.parseInt(input); //Essaye de le convertir en entier
+            } catch (NumberFormatException e) {
+                System.out.println("Choix invalide.");
+                continue; //Relance le menu
+            }
 
             //Pour gérer le cas où l'utilisateur rentre une chaine de caractère dans le menu
 

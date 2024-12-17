@@ -1,7 +1,6 @@
-
-
 package projet_paa.src;
 
+import java.util.Objects;
 
 public class Ressource {
     /*
@@ -44,5 +43,20 @@ public class Ressource {
     @Override
     public String toString() { //affiche le numéro de la ressource
         return "Ressource " + NumeroRessource;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Ressource that = (Ressource) o;
+        return NumeroRessource == that.NumeroRessource &&
+                Objects.equals(nomRessource, that.nomRessource);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(NumeroRessource, nomRessource);
     }
 }

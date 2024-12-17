@@ -1,6 +1,6 @@
 package projet_paa.src;
 
-import java.io.*;
+import  java.io.*;
 import java.util.*;
 
 /*
@@ -37,7 +37,7 @@ public class VerifFichierTxt {
                 if (ligne.startsWith("colon(")) {
                     // Vérification de l'ordre
                     if (partieRessources || partieDeteste) {
-                        throw new FichierException("Erreur a la ligne " + numeroLigne + " : L'ordre des sections n'est pas respecté. Il faut définir tous les collons avant les ressources ou les mauvaises relations.");
+                        throw new FichierException("Erreur a la ligne " + numeroLigne + " : L'ordre des sections n'est pas respecté. Il faut définir tous les colons avant les ressources ou les mauvaises relations.");
                     }
 
                     partieColons = true;
@@ -143,11 +143,18 @@ public class VerifFichierTxt {
                         throw new FichierException("Erreur ligne " + numeroLigne + " : Le colon " + nomColon + " dans preferences n'est pas défini.");
                     }
 
+                    Set<String> ressourcesVues = new HashSet<>();
+
                     for (int i = 1; i < elements.length; i++)
                     {
                         String ressource = elements[i].trim();
+
                         if (!ressources.contains(ressource)) {
                             throw new FichierException("Erreur ligne " + numeroLigne + " : La ressource " + ressource + " dans preferences n'est pas définie.");
+                        }
+
+                        if (!ressourcesVues.add(ressource)) {
+                            throw new FichierException("Erreur ligne " + numeroLigne + " : La ressource " + ressource + " est en double dans les préférences.");
                         }
                     }
                 }

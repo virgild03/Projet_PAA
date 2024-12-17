@@ -174,6 +174,10 @@ public class Colonie {
         int cout = 0;
 
         for (Colon colon : getListeColons()) {
+            colon.setJaloux(false);
+        }
+
+        for (Colon colon : getListeColons()) {
             Set<Colon> mauvaisesRelations = getVoisins(colon);
             Ressource ressourceAttribuee = colon.getRessourceAttribue();
             List<Ressource> preferences = colon.getPreference();
@@ -217,8 +221,8 @@ public class Colonie {
                 pw.println("Cout="+ this.calculerCout());
                 for(Colon c : getListeColons()){
 
-                    System.out.println(c.getNomColon()+" : "+c.getRessourceAttribue());
-                    pw.println(c.getNomColon()+":"+c.getRessourceAttribue());
+                    System.out.println(c.getNomColon()+" : "+c.getNomRessourceIntoColon());
+                    pw.println(c.getNomColon()+":"+c.getNomRessourceIntoColon());
                 }
             }
             catch(IOException e) {
