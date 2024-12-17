@@ -9,6 +9,7 @@ public class Affectation {
     //public static int cout; //Permet d'initialiser un cout (jalousie) à 0 lors de la création du simulateur.
     public  static HashMap<Colon, Ressource> affectation; //association des ressources aux colon avec un Dictionnaire.
     public static ArrayList<Ressource> ressourcesDisponibles; //liste des ressources dispo
+    public static int cout;
 
     public static void init(Colonie colonie) {
         affectation = new HashMap<>();
@@ -50,43 +51,43 @@ public class Affectation {
    - Lorsqu'on teste une nouvelle ressource pour un colon, on procède à un échange
      avec le colon qui la détient déjà (si besoin).
     */
-    public static HashMap<Colon, Ressource> affectationAutomatique(Colonie colonie) throws ColonException {
+
+    public static void affectationAutomatique(Colonie colonie) throws ColonException {
         ArrayList<Colon> listeColons = colonie.getListeColons();
         ArrayList<Ressource> listeRessources = colonie.getListeRessource();
-        affectation = new HashMap<>();
+        HashMap<Colon, Ressource> affectation = new HashMap<>();
 
-        // Affectation naïve selon les préférences :
-        // Pour chaque colon, on parcourt ses ressources préférées dans l'ordre et on lui assigne
-        // la première ressource encore disponible.
+        // Affectation naïve selon les préférences
         List<Ressource> ressourcesDisponibles = new ArrayList<>(listeRessources);
         for (Colon colon : listeColons) {
             boolean assigne = false;
             for (Ressource pref : colon.getPreference()) {
                 if (ressourcesDisponibles.contains(pref)) {
                     affectation.put(colon, pref);
-                    colon.setRessourceAttribue(pref);
+                    colon.setRessourceAttribue(pref);  // Attribuer la ressource au colon
                     ressourcesDisponibles.remove(pref);
                     assigne = true;
                     break;
                 }
             }
-            // Si on n'a pas pu assigner une ressource préférée (cas improbable, puisque le nb ress = nb colons),
-            // on assigne une ressource quelconque (dernière chance)
             if (!assigne && !ressourcesDisponibles.isEmpty()) {
                 Ressource r = ressourcesDisponibles.remove(0);
                 affectation.put(colon, r);
-                colon.setRessourceAttribue(r);
+                colon.setRessourceAttribue(r);  // Attribuer la ressource si aucune ressource préférée n'est disponible
             }
         }
 
+        // Initialisation du coût
         int coutTemporaire = colonie.calculerCout();
-        int nbIterations = 10000; // Nombre d'itérations d'amélioration (modulable)
+        int nbIterations = 10000; // Nombre d'itérations d'amélioration
+        double temperature = 1000.0; // Température initiale
+        double coolingRate = 0.995; // Taux de refroidissement
 
+        // Algorithme de recuit simulé
         for (int iteration = 0; iteration < nbIterations; iteration++) {
             boolean amelioration = false;
 
-            // On mélange l'ordre des colons et ressources à chaque itération
-            // pour explorer d'autres configurations et éviter les minima locaux
+            // Mélange de l'ordre des colons et des ressources à chaque itération pour explorer d'autres configurations
             Collections.shuffle(listeColons);
             Collections.shuffle(listeRessources);
 
@@ -110,30 +111,25 @@ public class Affectation {
                         if (autreColon != null && !autreColon.equals(colonCourant)) {
                             Ressource ancienneRessourceAutreColon = affectation.get(autreColon);
 
-                            // Échange
-                            affectation.put(colonCourant, ressourceCandidate);
-                            colonCourant.setRessourceAttribue(ressourceCandidate);
-
-                            affectation.put(autreColon, ressourceCourante);
-                            autreColon.setRessourceAttribue(ressourceCourante);
+                            // Effectuer l'échange via la méthode echangeRessource
+                            colonie.echangeRessource(colonCourant, autreColon);
 
                             int nouveauCout = colonie.calculerCout();
 
-                            if (nouveauCout >= coutTemporaire) {
-                                // On annule l'échange si pas d'amélioration
-                                affectation.put(colonCourant, ressourceCourante);
-                                colonCourant.setRessourceAttribue(ressourceCourante);
-
-                                affectation.put(autreColon, ancienneRessourceAutreColon);
-                                autreColon.setRessourceAttribue(ancienneRessourceAutreColon);
-                            } else {
-                                // Amélioration
+                            // Acceptation de la solution si elle améliore le coût ou selon la température
+                            if (nouveauCout < coutTemporaire) {
                                 coutTemporaire = nouveauCout;
                                 amelioration = true;
-
-                                // Optionnel : si on atteint le coût minimal, on peut arrêter
-                                if (coutTemporaire == 1) {
-                                    return affectation;
+                            } else {
+                                // On accepte une solution moins bonne avec une certaine probabilité
+                                double probability = Math.exp((coutTemporaire - nouveauCout) / temperature);
+                                Random rand = new Random();
+                                if (rand.nextDouble() < probability) {
+                                    coutTemporaire = nouveauCout;
+                                    amelioration = true;
+                                } else {
+                                    // Annuler l'échange si la solution n'est pas acceptée
+                                    colonie.echangeRessource(autreColon, colonCourant);
                                 }
                             }
                         }
@@ -141,43 +137,14 @@ public class Affectation {
                 }
             }
 
+            // Diminuer la température
+            temperature *= coolingRate;
+
+            // Si aucune amélioration n'a eu lieu, on arrête
             if (!amelioration) {
-                // Plus aucune amélioration n'est possible
                 break;
             }
         }
-
-        return affectation;
     }
 
-
-
-
-    public static void sauvegarde(HashMap<Colon, Ressource> map){
-
-		if(map == null || map.isEmpty()){
-			System.out.println("Il faut affecter les ressources aux colons avant de pouvoir sauvegarder !!!");
-		}
-		else {
-			System.out.println("\nChemin du fichier dans lequel il faut sauvegarder la colonie ? ");
-			Scanner sc = new Scanner(System.in);
-			String chemin = sc.nextLine();
-
-			try( PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(chemin)))) {
-
-				for(Map.Entry<Colon,Ressource> entry : map.entrySet()){
-					Colon c = entry.getKey();
-					Ressource ressource = entry.getValue();
-					System.out.println(c.getNomColon());
-					System.out.println(ressource);
-					pw.println(c.getNomColon()+":"+ressource.getNomRessource());
-				}
-			}
-			catch(IOException e) {
-				System.err.println(e.getMessage());
-				System.exit(1);
-			}
-			System.out.println("La sauvegarde à été effectuée !!!");
-		}
-	}
 }

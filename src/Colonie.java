@@ -2,6 +2,10 @@
 
 package projet_paa.src;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.*;
 
 public class Colonie {
@@ -71,7 +75,7 @@ public class Colonie {
         return nbColon;
     }
 
-    public ArrayList<Colon> getListeColons() {
+    public  ArrayList<Colon> getListeColons() {
         return listeColons;
     }
     
@@ -197,5 +201,33 @@ public class Colonie {
         }
 
         return cout; // Retourne le coût total
+    }
+
+    public void sauvegarde(){
+
+        if(getListeColons().getFirst().getRessourceAttribue()==null){
+            System.out.println("Il faut affecter les ressources aux colons avant de pouvoir sauvegarder !!!");
+        }
+        else {
+            System.out.println("\nChemin du fichier dans lequel il faut sauvegarder la colonie ? ");
+            Scanner sc = new Scanner(System.in);
+            String chemin = sc.nextLine();
+
+            try( PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(chemin)))) {
+                pw.println("Cout="+ this.calculerCout());
+                for(Colon c : getListeColons()){
+
+                    System.out.println(c.getNomColon()+" : "+c.getRessourceAttribue());
+                    pw.println(c.getNomColon()+":"+c.getRessourceAttribue());
+                }
+            }
+            catch(IOException e) {
+                System.err.println(e.getMessage());
+                System.exit(1);
+            } catch (ColonException e) {
+                throw new RuntimeException(e);
+            }
+            System.out.println("La sauvegarde à été effectuée !!!");
+        }
     }
 }
