@@ -187,7 +187,8 @@ public class Simulateur {
             try {
                 colonie = configurationColonieFichierTxt(args[0]);
             } catch (Exception e) {
-                System.out.println("Erreur lors de la configuration de la colonie : " + e.getMessage());
+                System.out.println("\nErreur lors de la configuration de la colonie : " + e.getMessage());
+                return;
             }
 
             if(colonie != null){

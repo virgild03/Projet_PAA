@@ -18,6 +18,7 @@ public class VerifFichierTxt {
         // Structures pour vérifier la cohérence
         Set<String> colons = new HashSet<>();          // Ensemble des noms des colons qui seront ajoutés à la colonie
         Set<String> ressources = new HashSet<>();      // Ensemble des noms des ressources qui seront ajoutés à la colonie
+        Map<String, Set<String>> preferencesMap = new HashMap<>(); //Stocke les préférences des colons
         boolean partieColons = true;
         boolean partieRessources = false;
         boolean partieDeteste = false;
@@ -157,11 +158,24 @@ public class VerifFichierTxt {
                             throw new FichierException("Erreur ligne " + numeroLigne + " : La ressource " + ressource + " est en double dans les préférences.");
                         }
                     }
+
+                    preferencesMap.put(nomColon, ressourcesVues);
                 }
 
                 else {
                     throw new FichierException("Erreur ligne " + numeroLigne + " : Ligne non reconnue. Les lignes valides commencent par colon, ressource, deteste ou preferences.");
                 }
+            }
+
+            List<String> colonsSansPreferences = new ArrayList<>();
+            for (String colon : colons) {
+                if (!preferencesMap.containsKey(colon)) {
+                    colonsSansPreferences.add(colon);
+                }
+            }
+
+            if (!colonsSansPreferences.isEmpty()) {
+                throw new FichierException("Erreur : Les colons suivants n'ont pas de préférences définies : " + colonsSansPreferences);
             }
 
             if (colons.size() != ressources.size()) {
