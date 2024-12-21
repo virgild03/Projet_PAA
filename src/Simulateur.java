@@ -278,11 +278,14 @@ public class Simulateur {
                     Colon colon1 = colonie.trouverColon(nom1); //récupère le premier colon
                     Colon colon2 = colonie.trouverColon(nom2); //récupère le second colon
 
-                    if (colon1 != null && colon2 != null) { //vérifie que les 2 colons existent
+                    if (colon1 != null && colon2 != null && colon1 != colon2) { //vérifie que les 2 colons existent
                         colonie.ajouterMauvaiseRelation(colon1, colon2);
                         System.out.println("Relation ajoutée entre " + nom1 + " et " + nom2);
-                    } else { //sinon renvoie un message d'erreur
+                    } else if(colon1 == null && colon2 == null) { //sinon renvoie un message d'erreur
                         System.out.println("L'un des colons n'a pas été trouvé.");
+                    }
+                    else{
+                        System.out.println("Un colon ne peut se détester lui même");
                     }
 
                 } else if (choix2 == 2) { //ajoute les preferences d'un colon (du préféré au pire)
@@ -291,21 +294,53 @@ public class Simulateur {
                     Colon colon = colonie.trouverColon(nomColon); //récupère le colon
 
                     if (colon != null) { //si le colon existe
-                        System.out.println("Entrez les numéros de ressources préférées de " + colon.getNomColon() + " en séparant chaque numéro par des espaces :");
-                        String[] ressourcesPref = sc.nextLine().split(" "); //crée un tableau avec les préférences du colon
+                        while (true) { // Boucle jusqu'à ce que des préférences valides soient saisies
+                            System.out.println("Entrez les numéros de ressources préférées de " + colon.getNomColon() + " en séparant chaque numéro par des espaces :");
+                            String[] ressourcesPref = sc.nextLine().trim().split("\\s+"); //crée un tableau avec les préférences du colon
 
-                        for (String resPref : ressourcesPref) {
-                            try {
-                                int numRes = Integer.parseInt(resPref); //convertit le numéro de la ressource de String à entier
-                                Ressource ressource = colonie.trouverRessource(numRes); //récupère la ressource associée
-                                if (ressource != null) { //si la ressource existe
-                                    colon.setPreference(ressource); //met à jour la préférence du colon
-                                } else { //sinon renvoie un message d'erreur
-                                    System.out.println("Ressource " + numRes + " non trouvée.");
-                                }
-                            } catch (NumberFormatException e) { //si le numéro entré n'est pas valide
-                                System.out.println(resPref + " n'est pas un numéro valide.");
+                            // Vérification des doublons
+                            Set<String> setPref = new HashSet<>(Arrays.asList(ressourcesPref));
+                            if (setPref.size() != ressourcesPref.length) {
+                                System.out.println("Erreur : Des ressources en double ont été détectées. Aucune préférence n'a été attribuée. Veuillez réessayer.");
+                                continue; // Redemande à l'utilisateur de saisir les préférences
                             }
+
+                            boolean doublonTrouve = false;
+                            List<Ressource> listePreferences = new ArrayList<>();
+                            for (String resPref : ressourcesPref) {
+                                try {
+                                    int numRes = Integer.parseInt(resPref); //convertit le numéro de la ressource de String à entier
+                                    Ressource ressource = colonie.trouverRessource(numRes); //récupère la ressource associée
+                                    if (ressource != null) { //si la ressource existe
+                                        listePreferences.add(ressource);
+                                    } else { //sinon renvoie un message d'erreur
+                                        System.out.println("Ressource " + numRes + " non trouvée.");
+                                        doublonTrouve = true;
+                                        break;
+                                    }
+                                } catch (NumberFormatException e) { //si le numéro entré n'est pas valide
+                                    System.out.println(resPref + " n'est pas un numéro valide.");
+                                    doublonTrouve = true;
+                                    break;
+                                }
+                            }
+
+                            if (doublonTrouve) {
+                                System.out.println("Aucune préférence n'a été attribuée en raison d'erreurs. Veuillez réessayer.");
+                                continue;
+                            }
+
+                            // Si toutes les ressources sont valides et sans doublons, attribuer les préférences
+                            for (Ressource ressource : listePreferences) {
+                                if (!colon.getPreference().contains(ressource)) { // Vérifie si la ressource n'est pas déjà dans les préférences
+                                    colon.setPreference(ressource); // ajoute la ressource aux préférences du colon
+                                } else {
+                                    System.out.println("La ressource " + ressource.getNumeroRessource() + " est déjà dans les préférences de " + colon.getNomColon() + ".");
+                                }
+                            }
+
+                            // Sortir de la boucle après une attribution réussie
+                            break;
                         }
                     } else { //sinon renvoie un message d'erreur
                         System.out.println("Colon " + nomColon + " non trouvé.");

@@ -18,8 +18,8 @@ public class Colon {
     public Colon(String n)  //Constructeur qui initialise le nom et la liste vide
     {
         this.nomColon = n;
-        preference = new ArrayList<>();
-        ressourceAttribuee = null;
+        this.preference = new ArrayList<>();
+        this.ressourceAttribuee = null;
     }
 
     public String getNomColon() //fonction pour recuperer le nom ailleur
